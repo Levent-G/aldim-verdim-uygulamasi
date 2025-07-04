@@ -65,13 +65,8 @@ const FootballerSVG = ({ active, direction = "right", color }) => {
       viewBox="0 0 160 140"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{
-        cursor: "pointer",
-        userSelect: "none",
-        transform: direction === "right" ? "scaleX(-1)" : "scaleX(1)",
-      }}
-      initial="inactive"
-      animate={active ? "active" : "inactive"}
+      style={{ cursor: "pointer", userSelect: "none" }}
+      animate={controls}
     >
       <motion.g
         transform={`rotate(${direction === "left" ? 0 : 180}, 80, 70)`}
