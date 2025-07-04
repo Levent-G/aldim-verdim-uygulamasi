@@ -1,0 +1,16 @@
+export const initialPlayers = [
+  { id: 1, name: "mehmet", avatar: "https://i.pravatar.cc/150?img=1" },
+  { id: 2, name: "emre cemal", avatar: "https://i.pravatar.cc/150?img=2" },
+  { id: 3, name: "bilal", avatar: "https://i.pravatar.cc/150?img=3" },
+  { id: 4, name: "umut", avatar: "https://i.pravatar.cc/150?img=4" },
+  { id: 5, name: "emirhan", avatar: "https://i.pravatar.cc/150?img=5" },
+  { id: 6, name: "berkay", avatar: "https://i.pravatar.cc/150?img=6" },
+  { id: 7, name: "furkan", avatar: "https://i.pravatar.cc/150?img=7" },
+  { id: 8, name: "erhan", avatar: "https://i.pravatar.cc/150?img=8" },
+  { id: 9, name: "alpsu", avatar: "https://i.pravatar.cc/150?img=9" },
+  { id: 10, name: "fatih", avatar: "https://i.pravatar.cc/150?img=10" },
+  { id: 11, name: "onur", avatar: "https://i.pravatar.cc/150?img=11" },
+  { id: 12, name: "buğra", avatar: "https://i.pravatar.cc/150?img=12" },
+  { id: 13, name: "sager", avatar: "https://i.pravatar.cc/150?img=13" },
+  { id: 14, name: "resul", avatar: "https://i.pravatar.cc/150?img=14" },
+];
