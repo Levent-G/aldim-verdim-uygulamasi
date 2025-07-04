@@ -117,9 +117,31 @@ const TeamCard = ({ team, color, onChangePlayer }) => {
                     ? ""
                     : player.name?.charAt(0)?.toUpperCase() || "?"}
                 </Avatar>
-                <Typography variant="body1" sx={{ fontSize: "1.2rem" }}>
-                  {player.name.toUpperCase()}
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography variant="body1" sx={{ fontSize: "1.2rem" }}>
+                    {player.name.toUpperCase()}
+                  </Typography>
+                  {player.kaptanMi && (
+                    <Box
+                      sx={{
+                        bgcolor: "black",
+                        color: "white",
+                        fontWeight: "bold",
+                        borderRadius: "50%",
+                        width: 24,
+                        height: 24,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        fontSize: 14,
+                        userSelect: "none",
+                      }}
+                      title="Kaptan"
+                    >
+                      K
+                    </Box>
+                  )}
+                </Box>
               </Box>
 
               <IconButton
@@ -238,8 +260,8 @@ const TeamDisplay = () => {
               color: "#333",
             }}
           >
-            <strong>{currentPlayer?.name.toUpperCase()}</strong> oyuncusunu değiştirmek
-            üzeresiniz.
+            <strong>{currentPlayer?.name.toUpperCase()}</strong> oyuncusunu
+            değiştirmek üzeresiniz.
           </Typography>
           <TextField
             variant="outlined"

@@ -50,8 +50,8 @@ export default function TeamSelectionStep() {
 
   useEffect(() => {
     if (!teamsInitialized.current && blackCaptain && whiteCaptain) {
-      setBlackTeam([blackCaptain]);
-      setWhiteTeam([whiteCaptain]);
+      setBlackTeam([{ ...blackCaptain, kaptanMi: true }]);
+      setWhiteTeam([{ ...whiteCaptain, kaptanMi: true }]);
       const newPool = playerPool.filter(
         (player) =>
           player.id !== blackCaptain.id && player.id !== whiteCaptain.id
