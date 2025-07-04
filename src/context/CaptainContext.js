@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from "react";
 import { database } from "../firebase";
-import { ref, onValue, update, set } from "firebase/database";
+import { ref, onValue, update } from "firebase/database";
 
 const CaptainContext = createContext();
 
@@ -20,7 +20,7 @@ export const CaptainProvider = ({ children }) => {
   const [isTeamOk, setIsTeamOk] = useState(false);
   const [blackTeam, setBlackTeam] = useState([]);
   const [whiteTeam, setWhiteTeam] = useState([]);
-  const [turn, setTurn] = useState(null);
+  const [turn, setTurn] = useState("white");
   const [captainPos, setCaptainPos] = useState({ black: 0, white: 0 });
   const [animatingCaptain, setAnimatingCaptain] = useState(null);
   const [blackDoneTeam, setBlackDoneTeam] = useState([]);
@@ -44,7 +44,7 @@ export const CaptainProvider = ({ children }) => {
         setBlackTeam(data.blackTeam || []);
         setWhiteTeam(data.whiteTeam || []);
         setIsTeamOk(data.isTeamOk || false);
-        setTurn(data.turn || null);
+        setTurn(data.turn || "white");
         setCaptainPos(data.captainPos || { black: 0, white: 0 });
         setAnimatingCaptain(data.animatingCaptain || null);
         setBlackDoneTeam(data.blackDoneTeam || []);
@@ -57,7 +57,7 @@ export const CaptainProvider = ({ children }) => {
         setBlackTeam([]);
         setWhiteTeam([]);
         setIsTeamOk(false);
-        setTurn(null);
+        setTurn("white");
         setCaptainPos({ black: 0, white: 0 });
         setAnimatingCaptain(null);
         setBlackDoneTeam([]);

@@ -57,11 +57,9 @@ export default function TeamSelectionStep() {
       setPlayerPool(newPool);
       teamsInitialized.current = true;
     }
-  }, [blackCaptain, whiteCaptain]);
+  }, [blackCaptain, whiteCaptain, playerPool, setBlackTeam, setWhiteTeam, setPlayerPool]);
 
-  useEffect(() => {
-    setTurn("white");
-  }, []);
+ 
 
   const captainBlack = {
     name: blackTeam[0]?.name || "Kaptan Siyah",
