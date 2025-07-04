@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
+import React from "react";
+import { motion } from "framer-motion";
 import { useTheme, useMediaQuery } from "@mui/material";
 
 const FootballerSVG = ({ active, direction = "right", color }) => {
@@ -11,15 +11,6 @@ const FootballerSVG = ({ active, direction = "right", color }) => {
 
   const skinColor = "#FDD7AA";
   const shirtColor = color || "#1976d2";
-
-  const controls = useAnimation();
-
-  useEffect(() => {
-    controls.start({
-      rotateY: direction === "left" ? 0 : 180,
-      transition: { duration: 0.3 },
-    });
-  }, [active, direction, controls]);
 
   const legAnimation = {
     active: {
@@ -65,11 +56,16 @@ const FootballerSVG = ({ active, direction = "right", color }) => {
       viewBox="0 0 160 140"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ cursor: "pointer", userSelect: "none" }}
-      animate={controls}
+      style={{
+        cursor: "pointer",
+        userSelect: "none",
+      }}
+      animate={{
+        scaleX: direction === "left" ? 1 : -1,
+      }}
+      transition={{ duration: 0.3 }}
     >
       <motion.g
-        transform={`rotate(${direction === "left" ? 0 : 180}, 80, 70)`}
         initial="inactive"
         animate={active ? "active" : "inactive"}
         variants={bodyAnimation}
@@ -117,7 +113,6 @@ const FootballerSVG = ({ active, direction = "right", color }) => {
         fill={skinColor}
         stroke="#222"
         strokeWidth="1.5"
-        transform={`rotate(${direction === "left" ? 0 : 180}, 80, 30)`}
         initial="inactive"
         animate={active ? "active" : "inactive"}
         variants={headAnimation}
