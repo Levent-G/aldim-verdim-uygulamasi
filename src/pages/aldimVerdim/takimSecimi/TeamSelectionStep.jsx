@@ -6,12 +6,14 @@ import {
   useTheme,
   useMediaQuery,
   Button,
+  Chip,
 } from "@mui/material";
 import Captain from "./components/Captain";
 import TeamPanel from "./components/TeamPanel";
 import PlayerPoolPanel from "./components/PlayerPoolPanel";
 import { useCaptainContext } from "../../../context/CaptainContext";
 import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const captainStepsLeft = [-300, -250, -200, -150, -100, -50, -20];
 const captainStepsRight = [300, 250, 200, 150, 100, 50, 20];
@@ -57,9 +59,14 @@ export default function TeamSelectionStep() {
       setPlayerPool(newPool);
       teamsInitialized.current = true;
     }
-  }, [blackCaptain, whiteCaptain, playerPool, setBlackTeam, setWhiteTeam, setPlayerPool]);
-
- 
+  }, [
+    blackCaptain,
+    whiteCaptain,
+    playerPool,
+    setBlackTeam,
+    setWhiteTeam,
+    setPlayerPool,
+  ]);
 
   const captainBlack = {
     name: blackTeam[0]?.name || "Kaptan Siyah",
@@ -195,7 +202,32 @@ export default function TeamSelectionStep() {
       <Grid container spacing={isXs ? 2 : 3} justifyContent="center">
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <TeamPanel
-            teamName="Siyah Takım"
+            teamName={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Comic Sans MS, cursive",
+                  }}
+                >
+                  Siyah Takım
+                </Typography>
+
+                {turn === "black" && (
+                  <Chip
+                    label="Sıra sende"
+                    color="success"
+                    icon={<CheckCircleIcon />}
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      height: "32px",
+                    }}
+                  />
+                )}
+              </Box>
+            }
             players={blackTeam}
             variant="black"
             isXs={isXs}
@@ -213,7 +245,32 @@ export default function TeamSelectionStep() {
 
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <TeamPanel
-            teamName="Beyaz Takım"
+            teamName={
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: "bold",
+                    fontFamily: "Comic Sans MS, cursive",
+                  }}
+                >
+                  Beyaz Takım
+                </Typography>
+
+                {turn === "white" && (
+                  <Chip
+                    label="Sıra sende"
+                    color="success"
+                    icon={<CheckCircleIcon />}
+                    sx={{
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      height: "32px",
+                    }}
+                  />
+                )}
+              </Box>
+            }
             players={whiteTeam}
             variant="white"
             isXs={isXs}
