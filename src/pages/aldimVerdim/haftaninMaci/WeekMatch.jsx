@@ -1,13 +1,10 @@
 import React, { useState } from "react";
-import { useCaptainContext } from "../../../context/CaptainContext";
 import TeamDisplay from "./components/TeamDisplay";
 
 const WeekMatch = () => {
-  const { blackDoneTeam, whiteDoneTeam } = useCaptainContext();
   const [showTeams, setShowTeams] = useState(false);
 
   const handleClick = () => {
-    console.log("blackDoneTeam", blackDoneTeam, "whiteDoneTeam", whiteDoneTeam);
     setShowTeams(!showTeams);
   };
 

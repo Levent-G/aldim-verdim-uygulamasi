@@ -18,7 +18,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const captainStepsLeft = [-300, -250, -200, -150, -100, -50, -20];
 const captainStepsRight = [300, 250, 200, 150, 100, 50, 20];
 
-export default function TeamSelectionStep() {
+export default function TeamSelectionStep({ isAdmin,isCaptain }) {
   const {
     blackCaptain,
     whiteCaptain,
@@ -44,7 +44,7 @@ export default function TeamSelectionStep() {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const isGameOver = blackTeam.length === 7 && whiteTeam.length === 7;
+  const isGameOver = playerPool.length === 0 ;
 
   const teamsInitialized = useRef(false);
 
@@ -83,43 +83,45 @@ export default function TeamSelectionStep() {
   };
 
   const selectPlayer = (player) => {
-    if (animating || isGameOver || !blackTeam[0] || !whiteTeam[0]) return;
+    if (isCaptain) {
+      if (animating || isGameOver || !blackTeam[0] || !whiteTeam[0]) return;
 
-    setAnimating(true);
-    setAnimatingCaptain(turn);
+      setAnimating(true);
+      setAnimatingCaptain(turn);
 
-    const totalSelected = blackTeam.length + whiteTeam.length;
-    let nextStep = captainPos[turn] + 1;
-    if (totalSelected + 1 === 14) {
-      nextStep = 6;
-    }
-    const newCaptainPos = { ...captainPos, [turn]: nextStep };
-
-    setTimeout(() => {
-      if (turn === "black" && blackTeam.length < 7) {
-        setBlackTeam([...blackTeam, player]);
-        setBlackDoneTeam([...blackTeam, player]);
-      }
-      if (turn === "white" && whiteTeam.length < 7) {
-        setWhiteTeam([...whiteTeam, player]);
-        setWhiteDoneTeam([...whiteTeam, player]);
-      }
-
-      const newPool = playerPool.filter((p) => p.id !== player.id);
-      setPlayerPool(newPool);
-
-      setCaptainPos(newCaptainPos);
-
+      const totalSelected = blackTeam.length + whiteTeam.length;
+      let nextStep = captainPos[turn] + 1;
       if (totalSelected + 1 === 14) {
-        setTurn(turn);
-      } else {
-        const newTurn = turn === "black" ? "white" : "black";
-        setTurn(newTurn);
+        nextStep = 6;
       }
+      const newCaptainPos = { ...captainPos, [turn]: nextStep };
 
-      setAnimatingCaptain(null);
-      setAnimating(false);
-    }, 700);
+      setTimeout(() => {
+        if (turn === "black" && blackTeam.length < 7) {
+          setBlackTeam([...blackTeam, player]);
+          setBlackDoneTeam([...blackTeam, player]);
+        }
+        if (turn === "white" && whiteTeam.length < 7) {
+          setWhiteTeam([...whiteTeam, player]);
+          setWhiteDoneTeam([...whiteTeam, player]);
+        }
+
+        const newPool = playerPool.filter((p) => p.id !== player.id);
+        setPlayerPool(newPool);
+
+        setCaptainPos(newCaptainPos);
+
+        if (totalSelected + 1 === 14) {
+          setTurn(turn);
+        } else {
+          const newTurn = turn === "black" ? "white" : "black";
+          setTurn(newTurn);
+        }
+
+        setAnimatingCaptain(null);
+        setAnimating(false);
+      }, 700);
+    }
   };
   return (
     <Box
@@ -214,7 +216,7 @@ export default function TeamSelectionStep() {
                   Siyah Takım
                 </Typography>
 
-                {turn === "black" && (
+                {turn === "black" && !isGameOver && (
                   <Chip
                     label="Sıra sende"
                     color="success"
@@ -257,7 +259,7 @@ export default function TeamSelectionStep() {
                   Beyaz Takım
                 </Typography>
 
-                {turn === "white" && (
+                {turn === "white" && !isGameOver && (
                   <Chip
                     label="Sıra sende"
                     color="success"
@@ -290,15 +292,16 @@ export default function TeamSelectionStep() {
           color="error"
           startIcon={<CloseIcon />}
           onClick={() => {
-            resetAll();
+            if (isAdmin) resetAll();
           }}
           sx={{
             borderRadius: 2,
             fontWeight: "bold",
             textTransform: "uppercase",
           }}
+          disabled={!isAdmin || !isGameOver}
         >
-          Bitir
+          Takım Oluşturmayı Bitir
         </Button>
       </Box>
     </Box>

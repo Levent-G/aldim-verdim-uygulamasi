@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   TextField,
@@ -13,6 +13,7 @@ import { useCaptainContext } from "../../../context/CaptainContext";
 import FootballerSVG from "../takimSecimi/components/FootballerSVG";
 import DeleteIcon from "@mui/icons-material/Delete";
 import WeekMatch from "../haftaninMaci/WeekMatch";
+import { useParams } from "react-router-dom";
 
 function getInitials(name) {
   return name
@@ -22,7 +23,7 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-export default function PlayerAndCaptainSelection() {
+export default function PlayerAndCaptainSelection({ isAdmin }) {
   const {
     players,
     setPlayers,
@@ -34,36 +35,49 @@ export default function PlayerAndCaptainSelection() {
     clearCaptains,
     setIsTeamOk,
     deleteAll,
+    getWeekId,
   } = useCaptainContext();
-
   const [name, setName] = useState("");
+
+  const { weekId } = useParams();
 
   const selectedCaptains = [blackCaptain, whiteCaptain].filter(Boolean);
 
+  useEffect(() => {
+    if (weekId) {
+      getWeekId(weekId);
+    }
+  }, [weekId, getWeekId]);
+
   const addPlayer = () => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    setPlayers([...players, { id: Date.now(), name: trimmed, avatar: "" }]);
-    setName("");
+    if (isAdmin) {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      setPlayers([...players, { id: Date.now(), name: trimmed, avatar: "" }]);
+      setName("");
+    }
   };
 
   const toggleCaptainSelect = (player) => {
-    const isAlreadySelected =
-      blackCaptain?.id === player.id || whiteCaptain?.id === player.id;
+    if (isAdmin) {
+      const isAlreadySelected =
+        blackCaptain?.id === player.id || whiteCaptain?.id === player.id;
 
-    if (isAlreadySelected) {
-      if (blackCaptain?.id === player.id) setBlackCaptain(null);
-      else if (whiteCaptain?.id === player.id) setWhiteCaptain(null);
-    } else {
-      if (!blackCaptain) {
-        setBlackCaptain(player);
-      } else if (!whiteCaptain) {
-        setWhiteCaptain(player);
+      if (isAlreadySelected) {
+        if (blackCaptain?.id === player.id) setBlackCaptain(null);
+        else if (whiteCaptain?.id === player.id) setWhiteCaptain(null);
+      } else {
+        if (!blackCaptain) {
+          setBlackCaptain(player);
+        } else if (!whiteCaptain) {
+          setWhiteCaptain(player);
+        }
       }
     }
   };
 
-    const handleRandomCaptain = () => {
+  const handleRandomCaptain = () => {
+    if (isAdmin) {
       if (players.length < 2) {
         alert("En az 2 oyuncu olmalı.");
         return;
@@ -88,46 +102,45 @@ export default function PlayerAndCaptainSelection() {
       setBlackCaptain(rand1);
       setWhiteCaptain(rand2);
       setPlayerPool(poolCopy);
-    };
+    }
+  };
 
   const handleStartTeam = () => {
-    if (!blackCaptain || !whiteCaptain) {
-      alert("Lütfen 2 kaptan seçin ya da rastgele seçin.");
-      return;
+    if (isAdmin) {
+      if (!blackCaptain || !whiteCaptain) {
+        alert("Lütfen 2 kaptan seçin ya da rastgele seçin.");
+        return;
+      }
+      const poolCopy = players.filter(
+        (p) => p.id !== blackCaptain?.id && p.id !== whiteCaptain?.id
+      );
+      setPlayerPool(poolCopy);
+      setIsTeamOk(true);
     }
-    const poolCopy = players.filter(
-      (p) => p.id !== blackCaptain?.id && p.id !== whiteCaptain?.id
-    );
-    setPlayerPool(poolCopy);
-    setIsTeamOk(true);
   };
 
   const handleDeletePlayer = (playerId) => {
-    const filterPlayer = players.filter((p) => p.id !== playerId);
-    setPlayers(filterPlayer);
-    if (blackCaptain?.id === playerId) setBlackCaptain(null);
-    if (whiteCaptain?.id === playerId) setWhiteCaptain(null);
+    if (isAdmin) {
+      const filterPlayer = players.filter((p) => p.id !== playerId);
+      setPlayers(filterPlayer);
+      if (blackCaptain?.id === playerId) setBlackCaptain(null);
+      if (whiteCaptain?.id === playerId) setWhiteCaptain(null);
+    }
   };
-  
-  const handleClearAllPlayers = () => {
-    if (!window.confirm("Tüm oyuncular ve kaptanlar silinecek. Emin misiniz?"))
-      return;
 
-    deleteAll();
+  const handleClearAllPlayers = () => {
+    if (isAdmin) {
+      if (
+        !window.confirm("Tüm oyuncular ve kaptanlar silinecek. Emin misiniz?")
+      )
+        return;
+
+      deleteAll();
+    }
   };
 
   return (
-    <Box
-      sx={{
-        maxWidth: 500,
-        mx: "auto",
-        p: 4,
-        bgcolor: "#fff",
-        borderRadius: 3,
-        boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
-        color: "#000",
-      }}
-    >
+    <Box>
       <Typography
         component="div"
         textAlign="center"
@@ -155,7 +168,7 @@ export default function PlayerAndCaptainSelection() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addPlayer()}
-          disabled={selectedCaptains.length > 1}
+          disabled={isAdmin === false || selectedCaptains.length > 1}
           sx={{
             "& .MuiInputBase-root": { borderRadius: 1 },
             "& .MuiOutlinedInput-notchedOutline": { borderColor: "#444" },
@@ -170,7 +183,7 @@ export default function PlayerAndCaptainSelection() {
         <Button
           variant="contained"
           onClick={addPlayer}
-          disabled={selectedCaptains.length > 1}
+          disabled={isAdmin === false || selectedCaptains.length > 1}
           sx={{
             bgcolor: "#000",
             "&:hover": { bgcolor: "#222" },
@@ -268,6 +281,7 @@ export default function PlayerAndCaptainSelection() {
                   marginLeft: "auto",
                   color: isCaptain ? "#fff" : "#000",
                 }}
+                disabled={isAdmin === false || selectedCaptains.length > 1}
               >
                 <DeleteIcon fontSize="small" />
               </IconButton>
@@ -286,7 +300,7 @@ export default function PlayerAndCaptainSelection() {
         <Button
           variant="outlined"
           onClick={handleRandomCaptain}
-          disabled={players.length < 2}
+          disabled={isAdmin === false || players.length < 2}
           sx={{
             borderColor: "#000",
             color: "#000",
@@ -304,7 +318,7 @@ export default function PlayerAndCaptainSelection() {
         <Button
           variant="contained"
           onClick={handleStartTeam}
-          disabled={selectedCaptains.length !== 2}
+          disabled={isAdmin === false || selectedCaptains.length !== 2}
           sx={{
             bgcolor: "#000",
             "&:hover": { bgcolor: "#444" },
@@ -331,6 +345,7 @@ export default function PlayerAndCaptainSelection() {
             fontWeight: "bold",
             width: { xs: "100%", sm: "auto" },
           }}
+          disabled={isAdmin === false}
         >
           Seçimi Sıfırla
         </Button>
@@ -349,6 +364,7 @@ export default function PlayerAndCaptainSelection() {
             fontWeight: "bold",
             width: { xs: "100%", sm: "auto" },
           }}
+          disabled={isAdmin === false || selectedCaptains.length > 1}
         >
           Tümünü Sil
         </Button>

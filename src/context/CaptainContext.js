@@ -4,13 +4,15 @@ import React, {
   useState,
   useEffect,
   useRef,
+  useCallback,
 } from "react";
 import { database } from "../firebase";
 import { ref, onValue, update } from "firebase/database";
 
 const CaptainContext = createContext();
-
 const DB_PATH = "sharedGameState";
+const DB_PATH_USERS = DB_PATH + "users";
+const DB_PATH_WEEK = DB_PATH + "weeks";
 
 export const CaptainProvider = ({ children }) => {
   const [blackCaptain, setBlackCaptain] = useState(null);
@@ -25,17 +27,19 @@ export const CaptainProvider = ({ children }) => {
   const [animatingCaptain, setAnimatingCaptain] = useState(null);
   const [blackDoneTeam, setBlackDoneTeam] = useState([]);
   const [whiteDoneTeam, setWhiteDoneTeam] = useState([]);
+  const [weeks, setWeeks] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  // İlk veri yüklemesini işaretlemek için ref
+  const [weekId, setWeekId] = useState(null);
+
+  const DB_PATH_WEEK_ITEM = `${DB_PATH}/weeks/${weekId}`;
+
   const isInitialLoad = useRef(true);
 
-  // Firebase realtime listener
   useEffect(() => {
-    const dbRef = ref(database, DB_PATH);
-    return onValue(dbRef, (snapshot) => {
+    const dbRef = ref(database, DB_PATH_WEEK_ITEM);
+    const unsubscribeWeekItem = onValue(dbRef, (snapshot) => {
       const data = snapshot.val();
-      console.log(data, "aaa");
-
       if (data) {
         setBlackCaptain(data.blackCaptain || null);
         setWhiteCaptain(data.whiteCaptain || null);
@@ -65,60 +69,138 @@ export const CaptainProvider = ({ children }) => {
       }
       isInitialLoad.current = false;
     });
+
+    const userDbRef = ref(database, DB_PATH_USERS);
+    const unsubscribeUsers = onValue(userDbRef, (snapshot) => {
+      const userData = snapshot.val();
+      if (userData) {
+        setUsers(userData.users || []);
+      } else {
+        setUsers([]);
+      }
+    });
+
+    const weekDbRef = ref(database, DB_PATH_WEEK);
+    const unsubscribeWeek = onValue(weekDbRef, (snapshot) => {
+      const weekData = snapshot.val();
+      if (weekData) {
+        setWeeks(weekData.week || []);
+      } else {
+        setWeeks([]);
+      }
+    });
+
+    return () => {
+      unsubscribeWeekItem();
+      unsubscribeUsers();
+      unsubscribeWeek();
+    };
+  }, [DB_PATH_WEEK_ITEM]);
+
+  const getWeekId = useCallback((weekId) => {
+    setWeekId(weekId);
   }, []);
 
-  // Firebase update helper
-  const updateFirebase = (updates) => {
-    const dbRef = ref(database, DB_PATH);
+  // Helper: Firebase update
+  const updateFirebaseWeekItem = (updates) => {
+    const dbRef = ref(database, DB_PATH_WEEK_ITEM);
     update(dbRef, updates).catch((e) =>
       console.error("Firebase update error:", e)
     );
   };
 
-  // Wrap state setters to sync Firebase
+  const updateFireBaseUsers = (updates) => {
+    const userDbRef = ref(database, DB_PATH_USERS);
+    update(userDbRef, updates).catch((e) =>
+      console.error("Firebase users update error:", e)
+    );
+  };
 
+  const updateFireBaseWeek = (updates) => {
+    const weekDbRef = ref(database, DB_PATH_WEEK);
+    update(weekDbRef, updates).catch((e) =>
+      console.error("Firebase week update error:", e)
+    );
+  };
+
+  // Wrapped setters to sync state and Firebase
   const setBlackCaptainAndSync = (value) => {
     setBlackCaptain(value);
-    updateFirebase({ blackCaptain: value });
+    updateFirebaseWeekItem({ blackCaptain: value });
   };
 
   const setWhiteCaptainAndSync = (value) => {
     setWhiteCaptain(value);
-    updateFirebase({ whiteCaptain: value });
+    updateFirebaseWeekItem({ whiteCaptain: value });
   };
 
   const setPlayerPoolAndSync = (value) => {
     setPlayerPool(value);
-    updateFirebase({ playerPool: value });
+    updateFirebaseWeekItem({ playerPool: value });
   };
 
   const setPlayersAndSync = (value) => {
     setPlayers(value);
-    updateFirebase({ players: value });
+    updateFirebaseWeekItem({ players: value });
   };
 
   const setIsTeamOkAndSync = (value) => {
     setIsTeamOk(value);
-    updateFirebase({ isTeamOk: value });
+    updateFirebaseWeekItem({ isTeamOk: value });
   };
 
   const setBlackTeamAndSync = (value) => {
     setBlackTeam(value);
-    updateFirebase({ blackTeam: value });
+    updateFirebaseWeekItem({ blackTeam: value });
   };
 
   const setWhiteTeamAndSync = (value) => {
     setWhiteTeam(value);
-    updateFirebase({ whiteTeam: value });
+    updateFirebaseWeekItem({ whiteTeam: value });
   };
 
-  // Captains sıfırlama (oyuncuları koru)
+  const setTurnAndSync = (value) => {
+    setTurn(value);
+    updateFirebaseWeekItem({ turn: value });
+  };
+
+  const setCaptainPosAndSync = (value) => {
+    setCaptainPos(value);
+    updateFirebaseWeekItem({ captainPos: value });
+  };
+
+  const setAnimatingCaptainAndSync = (value) => {
+    setAnimatingCaptain(value);
+    updateFirebaseWeekItem({ animatingCaptain: value });
+  };
+
+  const setBlackDoneTeamAndSync = (value) => {
+    setBlackDoneTeam(value);
+    updateFirebaseWeekItem({ blackDoneTeam: value });
+  };
+
+  const setWhiteDoneTeamAndSync = (value) => {
+    setWhiteDoneTeam(value);
+    updateFirebaseWeekItem({ whiteDoneTeam: value });
+  };
+
+  const setWeeksAndSync = (value) => {
+    setWeeks(value);
+    updateFireBaseWeek({ week: value });
+  };
+
+  const setUsersAndSync = (value) => {
+    setUsers(value);
+    updateFireBaseUsers({ users: value });
+  };
+
+  // Reset captains but keep players
   const clearCaptains = () => {
     setBlackCaptain(null);
     setWhiteCaptain(null);
     setPlayerPool(players);
     setIsTeamOk(false);
-    updateFirebase({
+    updateFirebaseWeekItem({
       blackCaptain: null,
       whiteCaptain: null,
       playerPool: players,
@@ -126,25 +208,19 @@ export const CaptainProvider = ({ children }) => {
     });
   };
 
-  // Tam reset - tüm state sıfırla
+  // Reset all (except players and teams remain as-is)
   const resetAll = () => {
     setBlackCaptain(null);
     setWhiteCaptain(null);
     setPlayerPool([]);
-    setPlayers(players);
-    setBlackTeam(blackTeam);
-    setWhiteTeam(whiteTeam);
     setIsTeamOk(false);
     setTurn(null);
     setCaptainPos({ black: 0, white: 0 });
     setAnimatingCaptain(null);
-    updateFirebase({
+    updateFirebaseWeekItem({
       blackCaptain: null,
       whiteCaptain: null,
       playerPool: [],
-      players: players,
-      blackTeam: blackTeam,
-      whiteTeam: whiteTeam,
       isTeamOk: false,
       turn: null,
       captainPos: { black: 0, white: 0 },
@@ -152,6 +228,7 @@ export const CaptainProvider = ({ children }) => {
     });
   };
 
+  // Delete all data
   const deleteAll = () => {
     setBlackCaptain(null);
     setWhiteCaptain(null);
@@ -163,7 +240,11 @@ export const CaptainProvider = ({ children }) => {
     setTurn(null);
     setCaptainPos({ black: 0, white: 0 });
     setAnimatingCaptain(null);
-    updateFirebase({
+    setBlackDoneTeam([]);
+    setWhiteDoneTeam([]);
+    setWeeks([]);
+    setUsers([]);
+    updateFirebaseWeekItem({
       blackCaptain: null,
       whiteCaptain: null,
       playerPool: [],
@@ -174,32 +255,11 @@ export const CaptainProvider = ({ children }) => {
       turn: null,
       captainPos: { black: 0, white: 0 },
       animatingCaptain: null,
+      blackDoneTeam: [],
+      whiteDoneTeam: [],
+      week: [],
+      users: [],
     });
-  };
-
-  const setTurnAndSync = (value) => {
-    setTurn(value);
-    updateFirebase({ turn: value });
-  };
-
-  const setCaptainPosAndSync = (value) => {
-    setCaptainPos(value);
-    updateFirebase({ captainPos: value });
-  };
-
-  const setAnimatingCaptainAndSync = (value) => {
-    setAnimatingCaptain(value);
-    updateFirebase({ animatingCaptain: value });
-  };
-
-  const setBlackDoneTeamAndSync = (value) => {
-    setBlackDoneTeam(value);
-    updateFirebase({ blackDoneTeam: value });
-  };
-
-  const setWhiteDoneTeamAndSync = (value) => {
-    setWhiteDoneTeam(value);
-    updateFirebase({ whiteDoneTeam: value });
   };
 
   return (
@@ -221,17 +281,22 @@ export const CaptainProvider = ({ children }) => {
         setIsTeamOk: setIsTeamOkAndSync,
         clearCaptains,
         resetAll,
+        deleteAll,
         turn,
         setTurn: setTurnAndSync,
         captainPos,
         setCaptainPos: setCaptainPosAndSync,
         animatingCaptain,
         setAnimatingCaptain: setAnimatingCaptainAndSync,
-        deleteAll: deleteAll,
         blackDoneTeam,
         setBlackDoneTeam: setBlackDoneTeamAndSync,
         whiteDoneTeam,
         setWhiteDoneTeam: setWhiteDoneTeamAndSync,
+        weeks,
+        setWeeks: setWeeksAndSync,
+        users,
+        setUsers: setUsersAndSync,
+        getWeekId: getWeekId,
       }}
     >
       {children}
