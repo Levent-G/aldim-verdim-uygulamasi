@@ -18,7 +18,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const captainStepsLeft = [-300, -250, -200, -150, -100, -50, -20];
 const captainStepsRight = [300, 250, 200, 150, 100, 50, 20];
 
-export default function TeamSelectionStep({ isAdmin,isCaptain }) {
+export default function TeamSelectionStep() {
   const {
     blackCaptain,
     whiteCaptain,
@@ -37,6 +37,8 @@ export default function TeamSelectionStep({ isAdmin,isCaptain }) {
     resetAll,
     setBlackDoneTeam,
     setWhiteDoneTeam,
+    isAdmin,
+    isCaptain
   } = useCaptainContext();
 
   const [animating, setAnimating] = useState(false);
@@ -81,7 +83,6 @@ export default function TeamSelectionStep({ isAdmin,isCaptain }) {
       whiteTeam[0]?.avatar ||
       "https://cdn-icons-png.flaticon.com/512/4140/4140049.png",
   };
-
   const selectPlayer = (player) => {
     if (isCaptain) {
       if (animating || isGameOver || !blackTeam[0] || !whiteTeam[0]) return;

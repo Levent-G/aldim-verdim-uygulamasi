@@ -29,12 +29,36 @@ export const CaptainProvider = ({ children }) => {
   const [whiteDoneTeam, setWhiteDoneTeam] = useState([]);
   const [weeks, setWeeks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isCaptain, setIsCaptain] = useState(false);
 
   const [weekId, setWeekId] = useState(null);
 
   const DB_PATH_WEEK_ITEM = `${DB_PATH}/weeks/${weekId}`;
 
   const isInitialLoad = useRef(true);
+
+  useEffect(() => {
+    if (!weekId) return;
+
+    const nickName = JSON.parse(localStorage.getItem("user"))?.nickname;
+    if (!nickName) {
+      setIsAdmin(false);
+      setIsCaptain(false);
+      return;
+    }
+
+    const currentWeek = weeks.find((w) => w.weekId === Number(weekId));
+    if (!currentWeek?.users) {
+      setIsAdmin(false);
+      setIsCaptain(false);
+      return;
+    }
+
+    const userRole = currentWeek.users[nickName]?.role;
+    setIsAdmin(userRole === "admin");
+    setIsCaptain(userRole === "kaptan");
+  }, [weeks, weekId]);
 
   useEffect(() => {
     const dbRef = ref(database, DB_PATH_WEEK_ITEM);
@@ -84,6 +108,8 @@ export const CaptainProvider = ({ children }) => {
     const unsubscribeWeek = onValue(weekDbRef, (snapshot) => {
       const weekData = snapshot.val();
       if (weekData) {
+        setIsAdmin(weekData.isAdmin || false);
+        setIsCaptain(weekData.isCaptain || false);
         setWeeks(weekData.week || []);
       } else {
         setWeeks([]);
@@ -297,6 +323,8 @@ export const CaptainProvider = ({ children }) => {
         users,
         setUsers: setUsersAndSync,
         getWeekId: getWeekId,
+        isAdmin,
+        isCaptain,
       }}
     >
       {children}
