@@ -18,6 +18,13 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 const captainStepsLeft = [-300, -250, -200, -150, -100, -50, -20];
 const captainStepsRight = [300, 250, 200, 150, 100, 50, 20];
 
+// Burada "siyah" ve "beyaz" string'lerini
+// captainPos key'lerine dönüştürmek için haritalama yapıyoruz.
+const turnToKeyMap = {
+  siyah: "black",
+  beyaz: "white",
+};
+
 export default function TeamSelectionStep() {
   const {
     blackCaptain,
@@ -37,16 +44,16 @@ export default function TeamSelectionStep() {
     resetAll,
     setBlackDoneTeam,
     setWhiteDoneTeam,
-    isAdmin,
-    isCaptain
+    isCaptain,
   } = useCaptainContext();
 
+  const user = JSON.parse(localStorage.getItem("user"));
   const [animating, setAnimating] = useState(false);
 
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const isGameOver = playerPool.length === 0 ;
+  const isGameOver = playerPool.length === 0;
 
   const teamsInitialized = useRef(false);
 
@@ -54,11 +61,13 @@ export default function TeamSelectionStep() {
     if (!teamsInitialized.current && blackCaptain && whiteCaptain) {
       setBlackTeam([{ ...blackCaptain, kaptanMi: true }]);
       setWhiteTeam([{ ...whiteCaptain, kaptanMi: true }]);
+
       const newPool = playerPool.filter(
         (player) =>
           player.id !== blackCaptain.id && player.id !== whiteCaptain.id
       );
       setPlayerPool(newPool);
+
       teamsInitialized.current = true;
     }
   }, [
@@ -83,28 +92,41 @@ export default function TeamSelectionStep() {
       whiteTeam[0]?.avatar ||
       "https://cdn-icons-png.flaticon.com/512/4140/4140049.png",
   };
+
   const selectPlayer = (player) => {
-    if (isCaptain) {
+    if (isCaptain && user?.rank === turn) {
       if (animating || isGameOver || !blackTeam[0] || !whiteTeam[0]) return;
 
       setAnimating(true);
       setAnimatingCaptain(turn);
 
       const totalSelected = blackTeam.length + whiteTeam.length;
-      let nextStep = captainPos[turn] + 1;
+
+      // Burada turn'u captainPos key'ine çeviriyoruz:
+      const captainKey = turnToKeyMap[turn];
+
+      // Eğer captainKey yoksa hata olmasın diye 0 kabul et
+      const currentPos =
+        typeof captainPos[captainKey] === "number" ? captainPos[captainKey] : 0;
+      let nextStep = currentPos + 1;
+
       if (totalSelected + 1 === 14) {
         nextStep = 6;
       }
-      const newCaptainPos = { ...captainPos, [turn]: nextStep };
+
+      const newCaptainPos = { ...captainPos, [captainKey]: nextStep };
 
       setTimeout(() => {
-        if (turn === "black" && blackTeam.length < 7) {
-          setBlackTeam([...blackTeam, player]);
-          setBlackDoneTeam([...blackTeam, player]);
+        if (turn === "siyah" && blackTeam.length < 7) {
+          const newBlackTeam = [...blackTeam, player];
+          setBlackTeam(newBlackTeam);
+          setBlackDoneTeam(newBlackTeam);
         }
-        if (turn === "white" && whiteTeam.length < 7) {
-          setWhiteTeam([...whiteTeam, player]);
-          setWhiteDoneTeam([...whiteTeam, player]);
+
+        if (turn === "beyaz" && whiteTeam.length < 7) {
+          const newWhiteTeam = [...whiteTeam, player];
+          setWhiteTeam(newWhiteTeam);
+          setWhiteDoneTeam(newWhiteTeam);
         }
 
         const newPool = playerPool.filter((p) => p.id !== player.id);
@@ -115,7 +137,7 @@ export default function TeamSelectionStep() {
         if (totalSelected + 1 === 14) {
           setTurn(turn);
         } else {
-          const newTurn = turn === "black" ? "white" : "black";
+          const newTurn = turn === "siyah" ? "beyaz" : "siyah";
           setTurn(newTurn);
         }
 
@@ -124,6 +146,7 @@ export default function TeamSelectionStep() {
       }, 700);
     }
   };
+
   return (
     <Box
       sx={{
@@ -151,56 +174,59 @@ export default function TeamSelectionStep() {
         gutterBottom
         sx={{
           fontWeight: "bold",
-          color: turn === "black" ? "#000" : "#444",
+          color: turn === "siyah" ? "#000" : "#444",
         }}
       >
         {!isGameOver
-          ? `Sıra ${turn === "black" ? "Siyah Takım" : "Beyaz Takım"}'da`
+          ? `Sıra ${turn === "siyah" ? "Siyah Takım" : "Beyaz Takım"}'da`
           : "Takımlar Tamamlandı! 🎉"}
       </Typography>
 
-      <Box
-        sx={{
-          position: "relative",
-          height: isXs ? 240 : 320,
-          background: `linear-gradient(
-            to right,
-            #f5f5f5 0%,
-            #e0e0e0 50%,
-            #212121 50%,
-            #424242 100%
-          )`,
-          borderRadius: 3,
-          overflow: "hidden",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "flex-end",
-          gap: isXs ? 2 : 6,
-          px: isXs ? 2 : 0,
-          py: isXs ? 2 : 0,
-          pb: 4,
-        }}
-      >
-        <Captain
-          side="black"
-          name={captainBlack.name}
-          active={turn === "black"}
-          animatingCaptain={animatingCaptain}
-          position={captainPos.black}
-          steps={captainStepsLeft}
-          isGameOver={isGameOver}
-        />
+      {/* Eğer mobil değilse animasyon alanını göster */}
+      {!isXs && (
+        <Box
+          sx={{
+            position: "relative",
+            height: 320,
+            background: `linear-gradient(
+        to right,
+        #f5f5f5 0%,
+        #e0e0e0 50%,
+        #212121 50%,
+        #424242 100%
+      )`,
+            borderRadius: 3,
+            overflow: "hidden",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "flex-end",
+            gap: 6,
+            px: 0,
+            py: 0,
+            pb: 4,
+          }}
+        >
+          <Captain
+            side="black"
+            name={captainBlack.name}
+            active={turn === "siyah"}
+            animatingCaptain={animatingCaptain}
+            position={captainPos.black}
+            steps={captainStepsLeft}
+            isGameOver={isGameOver}
+          />
 
-        <Captain
-          side="white"
-          name={captainWhite.name}
-          active={turn === "white"}
-          animatingCaptain={animatingCaptain}
-          position={captainPos.white}
-          steps={captainStepsRight}
-          isGameOver={isGameOver}
-        />
-      </Box>
+          <Captain
+            side="white"
+            name={captainWhite.name}
+            active={turn === "beyaz"}
+            animatingCaptain={animatingCaptain}
+            position={captainPos.white}
+            steps={captainStepsRight}
+            isGameOver={isGameOver}
+          />
+        </Box>
+      )}
 
       <Grid container spacing={isXs ? 2 : 3} justifyContent="center">
         <Grid item xs={12} sm={6} md={4} lg={4}>
@@ -217,18 +243,21 @@ export default function TeamSelectionStep() {
                   Siyah Takım
                 </Typography>
 
-                {turn === "black" && !isGameOver && (
-                  <Chip
-                    label="Sıra sende"
-                    color="success"
-                    icon={<CheckCircleIcon />}
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "0.9rem",
-                      height: "32px",
-                    }}
-                  />
-                )}
+                {turn === "siyah" &&
+                  !isGameOver &&
+                  user?.rank === "siyah" &&
+                  user?.isCaptain && (
+                    <Chip
+                      label="Sıra sende"
+                      color="success"
+                      icon={<CheckCircleIcon />}
+                      sx={{
+                        fontWeight: "bold",
+                        fontSize: "0.9rem",
+                        height: "32px",
+                      }}
+                    />
+                  )}
               </Box>
             }
             players={blackTeam}
@@ -260,18 +289,21 @@ export default function TeamSelectionStep() {
                   Beyaz Takım
                 </Typography>
 
-                {turn === "white" && !isGameOver && (
-                  <Chip
-                    label="Sıra sende"
-                    color="success"
-                    icon={<CheckCircleIcon />}
-                    sx={{
-                      fontWeight: "bold",
-                      fontSize: "0.9rem",
-                      height: "32px",
-                    }}
-                  />
-                )}
+                {turn === "beyaz" &&
+                  !isGameOver &&
+                  user?.rank === "beyaz" &&
+                  user?.isCaptain && (
+                    <Chip
+                      label="Sıra sende"
+                      color="success"
+                      icon={<CheckCircleIcon />}
+                      sx={{
+                        fontWeight: "bold",
+                        fontSize: "0.9rem",
+                        height: "32px",
+                      }}
+                    />
+                  )}
               </Box>
             }
             players={whiteTeam}
@@ -293,16 +325,32 @@ export default function TeamSelectionStep() {
           color="error"
           startIcon={<CloseIcon />}
           onClick={() => {
-            if (isAdmin) resetAll();
+            if (user?.isAdmin) resetAll();
           }}
           sx={{
             borderRadius: 2,
             fontWeight: "bold",
             textTransform: "uppercase",
           }}
-          disabled={!isAdmin || !isGameOver}
+          disabled={!user?.isAdmin || !isGameOver}
         >
           Takım Oluşturmayı Bitir
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={() => {
+            if (user?.isAdmin) resetAll();
+          }}
+          sx={{
+            borderRadius: 2,
+            fontWeight: "bold",
+            textTransform: "uppercase",
+            ml:2
+          }}
+          disabled={!user?.isAdmin }
+        >
+          Geri Dön
         </Button>
       </Box>
     </Box>

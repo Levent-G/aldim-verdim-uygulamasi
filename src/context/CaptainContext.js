@@ -39,27 +39,84 @@ export const CaptainProvider = ({ children }) => {
   const isInitialLoad = useRef(true);
 
   useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        const userStr = localStorage.getItem("user");
+        if (!userStr) return;
+
+        const user = JSON.parse(userStr);
+        const nickname = user.nickname;
+        if (!nickname || !weekId) return;
+
+        update(ref(database), {
+          [`weeks/${weekId}/users/${nickname}`]: null,
+        }).catch(console.error);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [weekId]);
+  /**
+   * LocalStorage Güncelleme Fonksiyonu
+   */
+  const updateLocalStorageUser = (username, updatedUserData) => {
+    const currentUserStr = localStorage.getItem("user");
+    if (!currentUserStr) return;
+
+    const currentUser = JSON.parse(currentUserStr);
+    if (currentUser.nickname !== username) return;
+
+    // Mevcut admin/captain durumu korunsun, sadece gerektiğinde override edilsin
+    const newUserData = {
+      ...currentUser,
+      ...updatedUserData,
+      isAdmin:
+        updatedUserData.role === "admin"
+          ? true
+          : updatedUserData.role === "user"
+          ? false
+          : currentUser.isAdmin, // adminlik sadece user yapılınca gider
+      isCaptain:
+        updatedUserData.role === "kaptan" || updatedUserData.isCaptain === true
+          ? true
+          : updatedUserData.role === "user"
+          ? false
+          : currentUser.isCaptain,
+    };
+
+    localStorage.setItem("user", JSON.stringify(newUserData));
+  };
+
+  /**
+   * WeekId değişince kullanıcının isAdmin / isCaptain durumunu güncelle
+   */
+  useEffect(() => {
     if (!weekId) return;
 
-    const nickName = JSON.parse(localStorage.getItem("user"))?.nickname;
-    if (!nickName) {
-      setIsAdmin(false);
-      setIsCaptain(false);
-      return;
-    }
+    const localUserStr = localStorage.getItem("user");
+    if (!localUserStr) return;
 
-    const currentWeek = weeks.find((w) => w.weekId === Number(weekId));
-    if (!currentWeek?.users) {
-      setIsAdmin(false);
-      setIsCaptain(false);
-      return;
-    }
+    const localUser = JSON.parse(localUserStr);
+    const currentWeek = weeks.find((w) => w?.weekId === Number(weekId));
+    if (!currentWeek) return;
 
-    const userRole = currentWeek.users[nickName]?.role;
-    setIsAdmin(userRole === "admin");
-    setIsCaptain(userRole === "kaptan");
+    const latestUserData = currentWeek.users?.[localUser.nickname];
+    if (!latestUserData) return;
+
+    updateLocalStorageUser(localUser.nickname, latestUserData);
+    setIsAdmin(latestUserData.role === "admin");
+    setIsCaptain(
+      latestUserData.role === "kaptan" || latestUserData.isCaptain === true
+    );
   }, [weeks, weekId]);
 
+  /**
+   * Firebase dinleyicileri
+   */
   useEffect(() => {
     const dbRef = ref(database, DB_PATH_WEEK_ITEM);
     const unsubscribeWeekItem = onValue(dbRef, (snapshot) => {
@@ -72,7 +129,7 @@ export const CaptainProvider = ({ children }) => {
         setBlackTeam(data.blackTeam || []);
         setWhiteTeam(data.whiteTeam || []);
         setIsTeamOk(data.isTeamOk || false);
-        setTurn(data.turn || "white");
+        setTurn(data.turn || "beyaz");
         setCaptainPos(data.captainPos || { black: 0, white: 0 });
         setAnimatingCaptain(data.animatingCaptain || null);
         setBlackDoneTeam(data.blackDoneTeam || []);
@@ -85,7 +142,7 @@ export const CaptainProvider = ({ children }) => {
         setBlackTeam([]);
         setWhiteTeam([]);
         setIsTeamOk(false);
-        setTurn("white");
+        setTurn("beyaz");
         setCaptainPos({ black: 0, white: 0 });
         setAnimatingCaptain(null);
         setBlackDoneTeam([]);
@@ -127,7 +184,9 @@ export const CaptainProvider = ({ children }) => {
     setWeekId(weekId);
   }, []);
 
-  // Helper: Firebase update
+  /**
+   * Firebase update helpers
+   */
   const updateFirebaseWeekItem = (updates) => {
     const dbRef = ref(database, DB_PATH_WEEK_ITEM);
     update(dbRef, updates).catch((e) =>
@@ -149,7 +208,50 @@ export const CaptainProvider = ({ children }) => {
     );
   };
 
-  // Wrapped setters to sync state and Firebase
+  /**
+   * LocalStorage güncellemesiyle birlikte Week güncelle
+   */
+  const setWeeksAndSync = (value) => {
+    setWeeks(value);
+    updateFireBaseWeek({ week: value });
+
+    const localNickname = JSON.parse(localStorage.getItem("user"))?.nickname;
+    if (!localNickname) return;
+
+    const currentWeek = value.find((w) => w?.weekId === Number(weekId));
+    if (!currentWeek || !currentWeek.users) return;
+
+    const userData = currentWeek.users[localNickname];
+    if (userData) {
+      updateLocalStorageUser(localNickname, userData);
+    }
+  };
+
+  /**
+   * Tek bir user'ı weeks içinde güncelle ve localStorage'a yansıt
+   */
+  const updateUserInWeekAndLocalStorage = (username, updatedUserData) => {
+    const currentWeek = weeks.find((w) => w?.weekId === Number(weekId));
+    if (!currentWeek) return;
+
+    const updatedWeek = {
+      ...currentWeek,
+      users: {
+        ...currentWeek.users,
+        [username]: updatedUserData,
+      },
+    };
+
+    const newWeeks = weeks.map((w) =>
+      w?.weekId === Number(weekId) ? updatedWeek : w
+    );
+
+    setWeeksAndSync(newWeeks);
+  };
+
+  /**
+   * Diğer wrapped setters
+   */
   const setBlackCaptainAndSync = (value) => {
     setBlackCaptain(value);
     updateFirebaseWeekItem({ blackCaptain: value });
@@ -210,17 +312,24 @@ export const CaptainProvider = ({ children }) => {
     updateFirebaseWeekItem({ whiteDoneTeam: value });
   };
 
-  const setWeeksAndSync = (value) => {
-    setWeeks(value);
-    updateFireBaseWeek({ week: value });
-  };
-
   const setUsersAndSync = (value) => {
     setUsers(value);
     updateFireBaseUsers({ users: value });
   };
 
-  // Reset captains but keep players
+  const setIsAdminAndSync = (value) => {
+    setIsAdmin(value);
+    updateFireBaseWeek({ isAdmin: value });
+  };
+
+  const setIsCaptainAndSync = (value) => {
+    setIsCaptain(value);
+    updateFireBaseWeek({ isCaptain: value });
+  };
+
+  /**
+   * Reset helpers
+   */
   const clearCaptains = () => {
     setBlackCaptain(null);
     setWhiteCaptain(null);
@@ -234,7 +343,6 @@ export const CaptainProvider = ({ children }) => {
     });
   };
 
-  // Reset all (except players and teams remain as-is)
   const resetAll = () => {
     setBlackCaptain(null);
     setWhiteCaptain(null);
@@ -254,7 +362,6 @@ export const CaptainProvider = ({ children }) => {
     });
   };
 
-  // Delete all data
   const deleteAll = () => {
     setBlackCaptain(null);
     setWhiteCaptain(null);
@@ -324,7 +431,11 @@ export const CaptainProvider = ({ children }) => {
         setUsers: setUsersAndSync,
         getWeekId: getWeekId,
         isAdmin,
+        setIsAdmin: setIsAdminAndSync,
         isCaptain,
+        setIsCaptain: setIsCaptainAndSync,
+        updateUserInWeekAndLocalStorage,
+        weekId,
       }}
     >
       {children}

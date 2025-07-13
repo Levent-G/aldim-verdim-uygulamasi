@@ -14,7 +14,7 @@ const UsersInWeek = ({ weekId }) => {
   const { weeks } = useCaptainContext();
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const week = weeks.find((w) => w.weekId === weekId);
+  const week = weeks.find((w) => w?.weekId === weekId);
   const userList = week?.users ? Object.keys(week.users) : [];
 
   const handleClick = (event) => {

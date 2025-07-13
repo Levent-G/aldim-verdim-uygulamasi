@@ -36,6 +36,8 @@ const CreateWeekForm = () => {
         [nickname]: {
           role: "admin",
           rank: null,
+          isCaptain: false,
+          isAdmin: true,
         },
       },
       isPrivate: isPrivate,
@@ -47,6 +49,8 @@ const CreateWeekForm = () => {
       joinedWeek: newWeekId,
       role: "admin",
       rank: null,
+      isCaptain: false,
+      isAdmin: true,
     };
 
     setUsers([...users, newUser]);

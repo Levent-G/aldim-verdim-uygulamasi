@@ -17,7 +17,7 @@ const JoinWeekForm = () => {
       return;
     }
 
-    const week = weeks.find((w) => w.weekId === Number(weekId));
+    const week = weeks.find((w) => w?.weekId === Number(weekId));
     if (!week) {
       alert("Week bulunamadı!");
       return;
@@ -34,29 +34,45 @@ const JoinWeekForm = () => {
       return;
     }
 
+    // *** BOŞSA ADMİN YETKİSİ VER ***
+    let isAdmin = false;
+    if (currentUserCount === 0) {
+      isAdmin = true;
+    } else if (week.isFinished) {
+      alert(
+        "Bu hafta tamamlanmış. Odaya girebilirsiniz ama admin yetkiniz olmayacak!"
+      );
+      isAdmin = false;
+    } else {
+      // İstersen başka admin atama logic'i buraya
+      isAdmin = false;
+    }
+
     const updatedWeek = {
       ...week,
       users: {
         ...week.users,
         [nickname]: {
-          role: "user",
+          role: isAdmin ? "admin" : "user",
           rank: null,
+          isCaptain: false,
+          isAdmin: isAdmin,
         },
       },
     };
 
     const updatedWeeks = weeks.map((w) =>
-      w.weekId === Number(weekId) ? updatedWeek : w
+      w?.weekId === Number(weekId) ? updatedWeek : w
     );
     setWeeks(updatedWeeks);
 
-    const joinWeekId = weeks.find((w) => w.weekId === Number(weekId));
-
     const newUser = {
       nickname,
-      joinedRoom: joinWeekId && joinWeekId.weekId,
-      role: "user",
+      joinedRoom: week.weekId,
+      role: isAdmin ? "admin" : "user",
       rank: null,
+      isCaptain: false,
+      isAdmin: isAdmin,
     };
 
     setUsers([...users, newUser]);
