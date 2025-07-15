@@ -8,7 +8,6 @@ import RoleMenu from "./components/RoleMenu";
 
 const AldimVerdimMain = () => {
   const { weekId } = useParams();
-  console.log(weekId)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 

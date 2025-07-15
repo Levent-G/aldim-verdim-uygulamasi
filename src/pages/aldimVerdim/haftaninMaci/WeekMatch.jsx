@@ -67,8 +67,7 @@ const WeekMatch = () => {
       return week;
     });
 
-    console.log("playersDetails", playersDetails);
-    console.log("updatedWeeks", updatedWeeks);
+   
 
     setWeeks(updatedWeeks);
     alert("Hafta başarıyla bitirildi!");
