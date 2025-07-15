@@ -212,13 +212,16 @@ export const CaptainProvider = ({ children }) => {
    * LocalStorage güncellemesiyle birlikte Week güncelle
    */
   const setWeeksAndSync = (value) => {
-    setWeeks(value);
-    updateFireBaseWeek({ week: value });
+    // undefined veya null haftaları sil
+    const filtered = value.filter(Boolean);
+
+    setWeeks(filtered);
+    updateFireBaseWeek({ week: filtered });
 
     const localNickname = JSON.parse(localStorage.getItem("user"))?.nickname;
     if (!localNickname) return;
 
-    const currentWeek = value.find((w) => w?.weekId === Number(weekId));
+    const currentWeek = filtered.find((w) => w?.weekId === Number(weekId));
     if (!currentWeek || !currentWeek.users) return;
 
     const userData = currentWeek.users[localNickname];

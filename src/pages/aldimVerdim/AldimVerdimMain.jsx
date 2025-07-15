@@ -8,7 +8,9 @@ import RoleMenu from "./components/RoleMenu";
 
 const AldimVerdimMain = () => {
   const { weekId } = useParams();
+
   const theme = useTheme();
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const { weeks } = useCaptainContext();
