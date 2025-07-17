@@ -44,6 +44,9 @@ export default function TeamSelectionStep() {
     setBlackDoneTeam,
     setWhiteDoneTeam,
     isCaptain,
+    weekId,
+    updateFireBaseWeek,
+    weeks,
   } = useCaptainContext();
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -81,8 +84,17 @@ export default function TeamSelectionStep() {
   useEffect(() => {
     if (isGameOver) {
       resetAll();
+
+      if (weekId) {
+        updateFireBaseWeek({
+          [`week`]: {
+            ...weeks.find((w) => w.weekId === Number(weekId)),
+            isFinished: true,
+          },
+        });
+      }
     }
-  }, [isGameOver, user, resetAll,playerPool]);
+  }, [isGameOver, user, resetAll, weekId, updateFireBaseWeek, weeks]);
 
   const captainBlack = {
     name: blackTeam[0]?.name || "Kaptan Siyah",

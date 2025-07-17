@@ -18,6 +18,8 @@ const AldimVerdimMain = () => {
   const foundWeek = weeks.find((w) => w?.weekId === Number(weekId));
   const isFinished = foundWeek?.isFinished;
 
+
+
   const newUsers = foundWeek?.users || {};
 
   const [openMobilePanel, setOpenMobilePanel] = useState(true);

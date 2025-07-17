@@ -138,7 +138,7 @@ export default function PlayerAndCaptainSelection({
       deleteAll();
     }
   };
-
+console.log(isFinished)
   return (
     <Box>
       {!isFinished && (

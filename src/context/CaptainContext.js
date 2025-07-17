@@ -439,6 +439,7 @@ export const CaptainProvider = ({ children }) => {
         setIsCaptain: setIsCaptainAndSync,
         updateUserInWeekAndLocalStorage,
         weekId,
+        updateFireBaseWeek
       }}
     >
       {children}
