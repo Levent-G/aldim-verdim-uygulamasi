@@ -5,7 +5,7 @@ import PlayerAndCaptainSelection from "../oyuncuSecimi/PlayerAndCaptainSelection
 import TeamSelectionStep from "../takimSecimi/TeamSelectionStep";
 import { useCaptainContext } from "../../../context/CaptainContext";
 
-const RightPanel = ({ isMobile, users }) => {
+const RightPanel = ({ isMobile, users, isFinished }) => {
   const { isAdmin, isTeamOk } = useCaptainContext();
 
   return (
@@ -39,6 +39,7 @@ const RightPanel = ({ isMobile, users }) => {
             <PlayerAndCaptainSelection
               isAdmin={isAdmin}
               users={users}
+              isFinished={isFinished}
             />
           ) : (
             <TeamSelectionStep />
