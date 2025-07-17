@@ -15,8 +15,7 @@ const AldimVerdimMain = () => {
 
   const { weeks } = useCaptainContext();
 
-  const foundWeek = weeks.find((w) => w?.weekId === Number(weekId));
-  const isFinished = foundWeek?.isFinished;
+  const foundWeek = weeks?.find((w) => w?.weekId === Number(weekId));
 
 
 
@@ -51,7 +50,6 @@ const AldimVerdimMain = () => {
       <RightPanel
         isMobile={isMobile}
         users={newUsers}
-        isFinished={isFinished}
       />
 
       <RoleMenu

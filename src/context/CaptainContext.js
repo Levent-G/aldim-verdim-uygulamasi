@@ -31,6 +31,7 @@ export const CaptainProvider = ({ children }) => {
   const [users, setUsers] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCaptain, setIsCaptain] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
 
   const [weekId, setWeekId] = useState(null);
 
@@ -330,6 +331,11 @@ export const CaptainProvider = ({ children }) => {
     updateFireBaseWeek({ isCaptain: value });
   };
 
+  const setIsFinishedAndSync = (value) => {
+    setIsFinished(value);
+    updateFirebaseWeekItem({ isFinished: value });
+  };
+
   /**
    * Reset helpers
    */
@@ -439,7 +445,8 @@ export const CaptainProvider = ({ children }) => {
         setIsCaptain: setIsCaptainAndSync,
         updateUserInWeekAndLocalStorage,
         weekId,
-        updateFireBaseWeek
+        isFinished,
+        setIsFinished: setIsFinishedAndSync,
       }}
     >
       {children}

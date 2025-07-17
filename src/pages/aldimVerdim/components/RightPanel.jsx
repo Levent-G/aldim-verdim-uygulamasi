@@ -5,7 +5,7 @@ import PlayerAndCaptainSelection from "../oyuncuSecimi/PlayerAndCaptainSelection
 import TeamSelectionStep from "../takimSecimi/TeamSelectionStep";
 import { useCaptainContext } from "../../../context/CaptainContext";
 
-const RightPanel = ({ isMobile, users, isFinished }) => {
+const RightPanel = ({ isMobile, users }) => {
   const { isAdmin, isTeamOk } = useCaptainContext();
 
   return (
@@ -32,7 +32,6 @@ const RightPanel = ({ isMobile, users, isFinished }) => {
             borderRadius: 5,
             bgcolor: "rgba(255,255,255,0.85)",
             backdropFilter: "blur(6px)",
-            p: isMobile ? 2 : 4,
             boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
           }}
         >
@@ -40,7 +39,6 @@ const RightPanel = ({ isMobile, users, isFinished }) => {
             <PlayerAndCaptainSelection
               isAdmin={isAdmin}
               users={users}
-              isFinished={isFinished}
             />
           ) : (
             <TeamSelectionStep />

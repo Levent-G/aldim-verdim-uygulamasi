@@ -11,7 +11,6 @@ import WeekMatch from "../haftaninMaci/WeekMatch";
 export default function PlayerAndCaptainSelection({
   isAdmin,
   users,
-  isFinished,
 }) {
   const {
     players,
@@ -25,6 +24,7 @@ export default function PlayerAndCaptainSelection({
     setIsTeamOk,
     deleteAll,
     getWeekId,
+    isFinished
   } = useCaptainContext();
 
   const user = JSON.parse(localStorage.getItem("user"));
@@ -138,9 +138,9 @@ export default function PlayerAndCaptainSelection({
       deleteAll();
     }
   };
-console.log(isFinished)
+
   return (
-    <Box>
+    <Box >
       {!isFinished && (
         <>
           <Header />
