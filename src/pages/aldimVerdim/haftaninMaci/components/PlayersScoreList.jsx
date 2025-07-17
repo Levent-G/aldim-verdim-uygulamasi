@@ -1,12 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  Paper,
-  Stack,
-  Avatar,
-  Rating,
-} from "@mui/material";
+import React, { useState, useEffect, useCallback } from "react";
+import { Box, Typography, Paper, Stack, Avatar, Rating } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PlayersScoreList = ({
@@ -19,13 +12,8 @@ const PlayersScoreList = ({
   const [sortedPlayers, setSortedPlayers] = useState([]);
   const [lastRatedPlayerId, setLastRatedPlayerId] = useState(null);
 
-  // İlk açıldığında sıralı listeyi kur
-  useEffect(() => {
-    sortPlayers();
-  }, [players, playerScores]);
-
   // Skora göre sıralama (manuel)
-  const sortPlayers = () => {
+  const sortPlayers = useCallback(() => {
     const sorted = [...players].sort((a, b) => {
       const scoreA =
         pendingScores[a.id] ??
@@ -38,7 +26,12 @@ const PlayersScoreList = ({
       return scoreB - scoreA;
     });
     setSortedPlayers(sorted);
-  };
+  }, [players, playerScores, pendingScores]);
+
+  // İlk açıldığında sıralı listeyi kur
+  useEffect(() => {
+    sortPlayers();
+  }, [sortPlayers]);
 
   const handleRate = (playerId, newValue) => {
     if (newValue == null) return;
@@ -56,8 +49,6 @@ const PlayersScoreList = ({
       >
         Oyuncu Puanları
       </Typography>
-
-     
 
       <Stack spacing={1}>
         {sortedPlayers.map((player) => {

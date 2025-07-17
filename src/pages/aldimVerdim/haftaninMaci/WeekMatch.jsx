@@ -24,14 +24,12 @@ const WeekMatch = () => {
 
   useEffect(() => {
     if (!currentWeek) return;
-  
+
     if (currentWeek.blackScore != null) {
       setBlackScore(currentWeek.blackScore ?? "");
-
     }
     if (currentWeek.whiteScore != null) {
       setWhiteScore(currentWeek.whiteScore ?? "");
-
     }
     if (currentWeek.playersDetails?.length > 0) {
       const scores = currentWeek.playersDetails.map((p) => ({
@@ -40,8 +38,7 @@ const WeekMatch = () => {
       }));
       setPlayerScores(scores);
     }
-  }, [weekId, weeks, blackTeam, whiteTeam]);
-  
+  }, [weekId, weeks, blackTeam, whiteTeam, currentWeek]);
 
   const handleFinishWeek = () => {
     if (blackScore === "" || whiteScore === "") {
