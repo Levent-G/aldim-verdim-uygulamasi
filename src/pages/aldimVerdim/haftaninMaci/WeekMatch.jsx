@@ -4,27 +4,34 @@ import { useCaptainContext } from "../../../context/CaptainContext";
 import TeamDisplay from "./components/TeamDisplay";
 import ScoreInputs from "./components/ScoreInputs";
 import PlayersScoreList from "./components/PlayersScoreList";
+import TeamPlaceholder from "./components/TeamPlaceholder";
 
 const WeekMatch = () => {
-  const { blackTeam, whiteTeam, weeks, weekId, setWeeks, isAdmin } =
-    useCaptainContext();
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  const [showTeams, setShowTeams] = useState(false);
-  const [blackScore, setBlackScore] = useState("");
-  const [whiteScore, setWhiteScore] = useState("");
-  const [playerScores, setPlayerScores] = useState([]);
+  const { blackTeam, whiteTeam, weeks, weekId, setWeeks, playerPool } =
+    useCaptainContext();
 
   const currentWeek = weeks.find((w) => w?.weekId === Number(weekId));
   const isFinished = currentWeek?.isFinished;
 
+  const isGameOver = playerPool.length === 0;
+
+  const [showTeams, setShowTeams] = useState(isGameOver ? true : false);
+  const [blackScore, setBlackScore] = useState(currentWeek?.blackScore || "");
+  const [whiteScore, setWhiteScore] = useState(currentWeek?.whiteScore || "");
+  const [playerScores, setPlayerScores] = useState([]);
+
   useEffect(() => {
     if (!currentWeek) return;
-
+  
     if (currentWeek.blackScore != null) {
-      setBlackScore(currentWeek.blackScore);
+      setBlackScore(currentWeek.blackScore ?? "");
+
     }
     if (currentWeek.whiteScore != null) {
-      setWhiteScore(currentWeek.whiteScore);
+      setWhiteScore(currentWeek.whiteScore ?? "");
+
     }
     if (currentWeek.playersDetails?.length > 0) {
       const scores = currentWeek.playersDetails.map((p) => ({
@@ -33,7 +40,8 @@ const WeekMatch = () => {
       }));
       setPlayerScores(scores);
     }
-  }, [currentWeek]);
+  }, [weekId, weeks, blackTeam, whiteTeam]);
+  
 
   const handleFinishWeek = () => {
     if (blackScore === "" || whiteScore === "") {
@@ -66,8 +74,6 @@ const WeekMatch = () => {
       }
       return week;
     });
-
-   
 
     setWeeks(updatedWeeks);
     alert("Hafta başarıyla bitirildi!");
@@ -128,8 +134,7 @@ const WeekMatch = () => {
           background: "linear-gradient(135deg, #FF416C, #FF4B2B)",
           color: "#fff",
           borderRadius: "50px",
-          padding: "15px 30px",
-          fontSize: "18px",
+          fontSize: "13px",
           width: "100%",
           fontWeight: "bold",
           letterSpacing: "1px",
@@ -145,15 +150,32 @@ const WeekMatch = () => {
       {(showTeams || isFinished) && (
         <Box sx={{ mt: 4 }}>
           <Stack spacing={4}>
-            <TeamDisplay teamName="Siyah Takım" team={blackTeam} />
-            <TeamDisplay teamName="Beyaz Takım" team={whiteTeam} />
+            {blackTeam.length > 0 ? (
+              <TeamDisplay
+                teamName="Siyah Takım"
+                team={blackTeam}
+                currentWeek={currentWeek}
+              />
+            ) : (
+              <TeamPlaceholder teamName="Siyah Takım" />
+            )}
+
+            {whiteTeam.length > 0 ? (
+              <TeamDisplay
+                teamName="Beyaz Takım"
+                team={whiteTeam}
+                currentWeek={currentWeek}
+              />
+            ) : (
+              <TeamPlaceholder teamName="Beyaz Takım" />
+            )}
 
             <ScoreInputs
               blackScore={blackScore}
               setBlackScore={setBlackScore}
               whiteScore={whiteScore}
               setWhiteScore={setWhiteScore}
-              disabled={isAdmin || isFinished}
+              disabled={user?.isAdmin === false || isFinished}
             />
 
             {blackScore !== "" && whiteScore !== "" && (
@@ -168,7 +190,7 @@ const WeekMatch = () => {
               <Button
                 variant="contained"
                 disabled={
-                  isAdmin ||
+                  user?.isAdmin === false ||
                   blackScore === "" ||
                   whiteScore === "" ||
                   allPlayers.length === 0

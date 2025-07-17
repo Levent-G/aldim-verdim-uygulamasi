@@ -36,7 +36,7 @@ const JoinWeekForm = () => {
 
     // *** BOŞSA ADMİN YETKİSİ VER ***
     let isAdmin = false;
-    if (currentUserCount === 0) {
+    if (currentUserCount === 0 && !week.isFinished) {
       isAdmin = true;
     } else if (week.isFinished) {
       alert(

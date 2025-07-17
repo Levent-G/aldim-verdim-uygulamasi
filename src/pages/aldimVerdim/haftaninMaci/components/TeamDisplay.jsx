@@ -11,11 +11,8 @@ import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import OyuncuDegistirModal from "./OyuncuDegistirModal";
 import { useCaptainContext } from "../../../../context/CaptainContext";
 
-const TeamDisplay = ({ teamName, team }) => {
-  const {
-    setBlackTeam,
-    setWhiteTeam,
-  } = useCaptainContext();
+const TeamDisplay = ({ teamName, team, currentWeek }) => {
+  const { setBlackTeam, setWhiteTeam } = useCaptainContext();
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -68,14 +65,16 @@ const TeamDisplay = ({ teamName, team }) => {
               </Avatar>
               <Typography>{player.name}</Typography>
             </Box>
-            <IconButton
-              onClick={() => {
-                setSelectedPlayer(player);
-                setModalOpen(true);
-              }}
-            >
-              <SwapHorizIcon />
-            </IconButton>
+            {!currentWeek?.isFinished && (
+              <IconButton
+                onClick={() => {
+                  setSelectedPlayer(player);
+                  setModalOpen(true);
+                }}
+              >
+                <SwapHorizIcon />
+              </IconButton>
+            )}
           </Paper>
         ))}
       </Stack>

@@ -12,7 +12,6 @@ import Captain from "./components/Captain";
 import TeamPanel from "./components/TeamPanel";
 import PlayerPoolPanel from "./components/PlayerPoolPanel";
 import { useCaptainContext } from "../../../context/CaptainContext";
-import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const captainStepsLeft = [-300, -250, -200, -150, -100, -50, -20];
@@ -78,6 +77,12 @@ export default function TeamSelectionStep() {
     setWhiteTeam,
     setPlayerPool,
   ]);
+
+  useEffect(() => {
+    if (isGameOver) {
+      resetAll();
+    }
+  }, [isGameOver, user, resetAll,playerPool]);
 
   const captainBlack = {
     name: blackTeam[0]?.name || "Kaptan Siyah",
@@ -312,7 +317,6 @@ export default function TeamSelectionStep() {
           />
         </Grid>
       </Grid>
-
       <Box
         sx={{
           display: "flex",
@@ -323,7 +327,6 @@ export default function TeamSelectionStep() {
         <Button
           variant="contained"
           color="error"
-          startIcon={<CloseIcon />}
           onClick={() => {
             if (user?.isAdmin) resetAll();
           }}
@@ -332,23 +335,7 @@ export default function TeamSelectionStep() {
             fontWeight: "bold",
             textTransform: "uppercase",
           }}
-          disabled={!user?.isAdmin || !isGameOver}
-        >
-          Takım Oluşturmayı Bitir
-        </Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={() => {
-            if (user?.isAdmin) resetAll();
-          }}
-          sx={{
-            borderRadius: 2,
-            fontWeight: "bold",
-            textTransform: "uppercase",
-            ml:2
-          }}
-          disabled={!user?.isAdmin }
+          disabled={!user?.isAdmin}
         >
           Geri Dön
         </Button>

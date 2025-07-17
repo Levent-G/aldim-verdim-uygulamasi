@@ -4,8 +4,6 @@ import { useCaptainContext } from "../../../../context/CaptainContext";
 const WeekList = () => {
   const { weeks } = useCaptainContext();
 
-
-
   return (
     <Grid container spacing={2}>
       {weeks?.map(
@@ -27,7 +25,7 @@ const WeekList = () => {
                 <CardContent>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="h6">
-                      Week ID: {week?.weekId}
+                      ID: {week?.weekId}
                     </Typography>
                     {week?.isFinished && (
                       <Chip
@@ -38,6 +36,11 @@ const WeekList = () => {
                       />
                     )}
                   </Box>
+
+                  <Typography sx={{ mt: 1 }}>
+                    Tarih: {new Date(Number(week?.weekId)).toLocaleDateString("tr-TR")}
+                  </Typography>
+
                   <Typography sx={{ mt: 1 }}>
                     {Object.keys(week?.users || {}).length}/{week?.size} kişi
                   </Typography>

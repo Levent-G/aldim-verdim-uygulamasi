@@ -29,7 +29,7 @@ const LeftPanel = ({
   setSelectedUser,
   weekId,
 }) => {
-  const { setUsers, weeks, setWeeks, setIsAdmin, setIsCaptain } =
+  const { setUsers, weeks, setWeeks, setIsAdmin, setIsCaptain,resetAll } =
     useCaptainContext();
 
   const navigate = useNavigate();
@@ -77,6 +77,7 @@ const LeftPanel = ({
     setIsAdmin(false);
     setIsCaptain(false);
     navigate("/");
+    resetAll();
   };
 
   const usersSize = foundWeek?.users ? Object.keys(foundWeek.users).length : 0;
