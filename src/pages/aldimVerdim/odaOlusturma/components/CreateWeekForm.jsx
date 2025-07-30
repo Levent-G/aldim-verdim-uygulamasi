@@ -1,26 +1,27 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
-  TextField,
+  Switch,
   Button,
   MenuItem,
+  TextField,
   Typography,
   FormControlLabel,
-  Switch,
 } from "@mui/material";
-import { useCaptainContext } from "../../../../context/CaptainContext";
 import { useNavigate } from "react-router-dom";
+import { useCaptainContext } from "../../../../context/CaptainContext";
+import { defaultWeekSizes } from "./shared/haftaOlusturEnum";
 
-const defaultWeekSizes = [2, 4, 6, 8, 14];
 
 const CreateWeekForm = () => {
   const { weeks, setWeeks, users, setUsers } = useCaptainContext();
 
+  const navigate = useNavigate();
+ 
   const [nickname, setNickname] = useState("");
   const [weekSize, setWeekSize] = useState(14);
   const [isPrivate, setIsPrivate] = useState(false);
 
-  const navigate = useNavigate();
 
   const handleCreateWeek = async () => {
     if (!nickname) {

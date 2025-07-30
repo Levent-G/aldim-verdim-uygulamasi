@@ -1,25 +1,29 @@
-import React from "react";
-import { Typography, useTheme, useMediaQuery } from "@mui/material";
 import { motion } from "framer-motion";
+import { useCaptainContext } from "../../../../context/CaptainContext";
+import { Typography, useTheme, useMediaQuery } from "@mui/material";
 import FootballerSVG from "./FootballerSVG";
 
 export default function Captain({
   side,
   name,
-  active,
-  animatingCaptain,
-  position,
   steps,
-  isGameOver,
+  active,
   onClick,
+  position,
 }) {
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Mobilde adım uzunluklarını daha küçük tut
-  const mobileSteps = side === "black"
-    ? [-80, -60, -40, -30, -20, -10, -5]
-    : [80, 60, 40, 30, 20, 10, 5];
+  const mobileSteps =
+    side === "black"
+      ? [-80, -60, -40, -30, -20, -10, -5]
+      : [80, 60, 40, 30, 20, 10, 5];
+
+  const { playerPool, animatingCaptain } = useCaptainContext();
+
+  const isGameOver = playerPool.length === 0;
+
   return (
     <motion.div
       key={`captain-${side}`}

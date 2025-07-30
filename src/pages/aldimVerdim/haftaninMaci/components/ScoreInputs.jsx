@@ -1,4 +1,5 @@
-import React from "react";
+import { useFoundWeek } from "../../../hooks/useFoundWeek";
+import { useCaptainContext } from "../../../../context/CaptainContext";
 import { Stack, TextField, Box, Typography } from "@mui/material";
 
 const ScoreInputs = ({
@@ -6,8 +7,15 @@ const ScoreInputs = ({
   setBlackScore,
   whiteScore,
   setWhiteScore,
-  disabled,
 }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const { weekId } = useCaptainContext();
+
+  const { isFinished } = useFoundWeek(weekId);
+
+  const disabled = user?.isAdmin === false || isFinished;
+
   return (
     <Stack
       direction={{ xs: "column", sm: "row" }}

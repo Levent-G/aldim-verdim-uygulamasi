@@ -1,12 +1,15 @@
-import React from "react";
-import { Box, Paper } from "@mui/material";
 import { motion } from "framer-motion";
-import PlayerAndCaptainSelection from "../oyuncuSecimi/PlayerAndCaptainSelection";
-import TeamSelectionStep from "../takimSecimi/TeamSelectionStep";
 import { useCaptainContext } from "../../../context/CaptainContext";
+import { Box, Paper, useMediaQuery, useTheme } from "@mui/material";
+import TeamSelectionStep from "../takimSecimi/TeamSelectionStep";
+import PlayerAndCaptainSelection from "../oyuncuSecimi/PlayerAndCaptainSelection";
 
-const RightPanel = ({ isMobile, users, isFinished }) => {
-  const { isAdmin, isTeamOk } = useCaptainContext();
+const RightPanel = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const { isTeamOk } = useCaptainContext();
+
 
   return (
     <Box
@@ -37,9 +40,6 @@ const RightPanel = ({ isMobile, users, isFinished }) => {
         >
           {!isTeamOk ? (
             <PlayerAndCaptainSelection
-              isAdmin={isAdmin}
-              users={users}
-              isFinished={isFinished}
             />
           ) : (
             <TeamSelectionStep />

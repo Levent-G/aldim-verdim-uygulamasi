@@ -1,9 +1,11 @@
-import React from "react";
-import { Paper, Typography, Stack } from "@mui/material";
 import { AnimatePresence } from "framer-motion";
+import { Paper, Typography, Stack, useTheme, useMediaQuery } from "@mui/material";
 import PlayerCard from "./PlayerCard";
 
-export default function TeamPanel({ teamName, players, variant, isXs }) {
+export default function TeamPanel({ teamName, players, variant}) {
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
     <Paper
       elevation={4}

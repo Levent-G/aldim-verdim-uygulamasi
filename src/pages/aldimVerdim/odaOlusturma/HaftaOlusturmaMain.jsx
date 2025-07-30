@@ -1,10 +1,17 @@
-import React from "react";
-import { Box, Typography, Paper, Divider, useTheme, useMediaQuery, Container } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Divider,
+  useTheme,
+  Container,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
+import WeekList from "./components/WeekList";
 import JoinWeekForm from "./components/JoinWeekForm";
 import CreateWeekForm from "./components/CreateWeekForm";
-import WeekList from "./components/WeekList";
 
-const HaftaOlusturmaMain = ({ onJoin }) => {
+const HaftaOlusturmaMain = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -54,14 +61,12 @@ const HaftaOlusturmaMain = ({ onJoin }) => {
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
               🚀 Odaya Katıl
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "#6b7280", mb: 2 }}
-            >
-              Arkadaşlarının oluşturduğu bir haftaya katılmak için oda kodunu gir.
+            <Typography variant="body2" sx={{ color: "#6b7280", mb: 2 }}>
+              Arkadaşlarının oluşturduğu bir haftaya katılmak için oda kodunu
+              gir.
             </Typography>
             <Divider sx={{ my: 2 }} />
-            <JoinWeekForm onJoin={onJoin} />
+            <JoinWeekForm />
           </Paper>
 
           {/* Oda Oluştur */}
@@ -76,10 +81,7 @@ const HaftaOlusturmaMain = ({ onJoin }) => {
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
               🛠️ Oda Oluştur
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "#6b7280", mb: 2 }}
-            >
+            <Typography variant="body2" sx={{ color: "#6b7280", mb: 2 }}>
               Kendi haftanı oluştur, arkadaşlarını davet et ve oyunu başlat!
             </Typography>
             <Divider sx={{ my: 2 }} />
@@ -122,7 +124,8 @@ const HaftaOlusturmaMain = ({ onJoin }) => {
                 mb: 3,
               }}
             >
-              Mevcut aktif haftalara göz atabilir, dilediğine katılabilirsin. Unutma, eğlence burada!
+              Mevcut aktif haftalara göz atabilir, dilediğine katılabilirsin.
+              Unutma, eğlence burada!
             </Typography>
 
             <Divider sx={{ mb: 3 }} />

@@ -1,5 +1,5 @@
-import { Card, CardContent, Typography, Grid, Chip, Box } from "@mui/material";
 import { useCaptainContext } from "../../../../context/CaptainContext";
+import { Card, CardContent, Typography, Grid, Chip, Box } from "@mui/material";
 
 const WeekList = () => {
   const { weeks } = useCaptainContext();

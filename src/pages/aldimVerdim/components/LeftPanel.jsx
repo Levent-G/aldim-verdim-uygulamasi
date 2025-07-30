@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -10,41 +10,39 @@ import {
   ListItemText,
   IconButton,
   Button,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import GroupsIcon from "@mui/icons-material/Groups";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { useCaptainContext } from "../../../context/CaptainContext";
 import { useNavigate } from "react-router-dom";
+import { useFoundWeek } from "../../hooks/useFoundWeek";
 
-const LeftPanel = ({
-  isMobile,
-  openMobilePanel,
-  setOpenMobilePanel,
-  users,
-  foundWeek,
-  setAnchorEl,
-  setSelectedUser,
-  weekId,
-}) => {
-  const { setUsers, weeks, setWeeks, setIsAdmin, setIsCaptain,resetAll } =
+const LeftPanel = (props) => {
+  const {  weekId } = props;
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const { setUsers, weeks, setWeeks, setIsAdmin, setIsCaptain, resetAll } =
     useCaptainContext();
+  const { foundWeek, foundUsers } = useFoundWeek(weekId);
 
   const navigate = useNavigate();
 
-  const handleOpenRoleMenu = (event, username, userData) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedUser({ username, userData });
-  };
+  const [openMobilePanel, setOpenMobilePanel] = useState(true);
+
+
 
   const handleLeaveRoom = () => {
     const userStr = localStorage.getItem("user");
     if (!userStr) return;
     const localUser = JSON.parse(userStr);
 
-    const updatedUsers = Object.entries(users)
+    const updatedUsers = Object.entries(foundUsers)
       .filter(([key]) => key !== localUser.nickname)
       .reduce((acc, [key, val]) => {
         acc[key] = val;
@@ -132,10 +130,9 @@ const LeftPanel = ({
               <GroupsIcon /> Katılımcılar {odaSize}
             </Typography>
             <List dense>
-              {users && Object.keys(users).length > 0 ? (
-                Object.entries(users).map(([username, userData], i) => {
+              {foundUsers && Object.keys(foundUsers).length > 0 ? (
+                Object.entries(foundUsers).map(([username, userData], i) => {
                   const localUser = JSON.parse(localStorage.getItem("user"));
-                  const isAdmin = localUser?.isAdmin;
                   const isCurrentUser = localUser?.nickname === username;
 
                   return (
@@ -160,31 +157,10 @@ const LeftPanel = ({
                       </ListItemAvatar>
                       <ListItemText
                         primary={username || "Anonim"}
-                        secondary={
-                          userData?.role === "admin"
-                            ? userData?.isCaptain
-                              ? `Rol: admin + kaptan (${userData?.rank})`
-                              : `Rol: admin`
-                            : userData?.role === "kaptan"
-                            ? `Rol: kaptan (${userData?.rank})`
-                            : `Rol: ${userData?.role}`
-                        }
+                        
                         sx={{ color: "#374151" }}
                       />
-                      {isAdmin && (
-                        <IconButton
-                          size="small"
-                          onClick={(e) =>
-                            handleOpenRoleMenu(e, username, userData)
-                          }
-                          sx={{
-                            color: "#374151",
-                            ml: "auto",
-                          }}
-                        >
-                          <AdminPanelSettingsIcon fontSize="small" />
-                        </IconButton>
-                      )}
+                     
                     </ListItem>
                   );
                 })

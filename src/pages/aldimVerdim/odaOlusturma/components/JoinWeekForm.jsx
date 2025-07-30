@@ -1,57 +1,52 @@
-import React, { useState } from "react";
-import { Box, TextField, Button, Typography } from "@mui/material";
-import { useCaptainContext } from "../../../../context/CaptainContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCaptainContext } from "../../../../context/CaptainContext";
+import { Box, TextField, Button, Typography } from "@mui/material";
+import { useFoundWeek } from "../../../hooks/useFoundWeek";
 
 const JoinWeekForm = () => {
   const { weeks, setWeeks, users, setUsers } = useCaptainContext();
-
+  
+  const navigate = useNavigate();
+  
   const [nickname, setNickname] = useState("");
   const [weekId, setWeekId] = useState("");
-
-  const navigate = useNavigate();
+  
+  const {foundWeek} = useFoundWeek(weekId);
 
   const handleJoin = async () => {
     if (!nickname || !weekId) {
       alert("Lütfen kullanıcı adı ve week ID giriniz!");
       return;
     }
-
-    const week = weeks.find((w) => w?.weekId === Number(weekId));
-    if (!week) {
+    
+    if (!foundWeek) {
       alert("Week bulunamadı!");
       return;
     }
 
-    const currentUserCount = week.users ? Object.keys(week.users).length : 0;
-    if (currentUserCount >= week.size) {
+    const currentUserCount = foundWeek.users ? Object.keys(foundWeek.users).length : 0;
+    if (currentUserCount >= foundWeek.size) {
       alert("Week dolu!");
       return;
     }
 
-    if (week.users && week.users[nickname]) {
+    if (foundWeek.users && foundWeek.users[nickname]) {
       alert("Bu kullanıcı adı zaten bu week içinde mevcut!");
       return;
     }
 
-    // *** BOŞSA ADMİN YETKİSİ VER ***
     let isAdmin = false;
-    if (currentUserCount === 0 && !week.isFinished) {
+    if (currentUserCount === 0 ) {
       isAdmin = true;
-    } else if (week.isFinished) {
-      alert(
-        "Bu hafta tamamlanmış. Odaya girebilirsiniz ama admin yetkiniz olmayacak!"
-      );
-      isAdmin = false;
     } else {
-      // İstersen başka admin atama logic'i buraya
       isAdmin = false;
     }
 
     const updatedWeek = {
-      ...week,
+      ...foundWeek,
       users: {
-        ...week.users,
+        ...foundWeek.users,
         [nickname]: {
           role: isAdmin ? "admin" : "user",
           rank: null,
@@ -68,14 +63,16 @@ const JoinWeekForm = () => {
 
     const newUser = {
       nickname,
-      joinedRoom: week.weekId,
+      joinedRoom: foundWeek.weekId,
       role: isAdmin ? "admin" : "user",
       rank: null,
       isCaptain: false,
       isAdmin: isAdmin,
     };
 
-    setUsers([...users, newUser]);
+    const updatedUsers = [...(Array.isArray(users) ? users : []), newUser];
+
+    setUsers(updatedUsers);
     localStorage.setItem("user", JSON.stringify(newUser));
 
     alert(`Başarıyla ${weekId} week'ine katıldınız.`);

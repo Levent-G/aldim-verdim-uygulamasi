@@ -1,15 +1,16 @@
-import React from "react";
-import { Card, Box, Avatar, Typography } from "@mui/material";
 import { motion } from "framer-motion";
+import { Card, Box, Avatar, Typography, useTheme, useMediaQuery } from "@mui/material";
 
 export default function PlayerCard({
   player,
   onClick,
   isCaptain,
-  isXs,
   variant = "default",
   animating = false,
 }) {
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down("sm"));
+
   const getInitials = (name) =>
     name
       .split(" ")

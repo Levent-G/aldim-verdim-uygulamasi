@@ -1,23 +1,29 @@
-import React from "react";
 import {
   Menu,
-  MenuItem,
   Divider,
-  ListItemIcon,
+  MenuItem,
   ListItemText,
+  ListItemIcon,
 } from "@mui/material";
-import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
+import { useFoundWeek } from "../../hooks/useFoundWeek";
 import { useCaptainContext } from "../../../context/CaptainContext";
+import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 
 const RoleMenu = ({
-  anchorEl,
+  openRoleMenu,
   onClose,
   selectedUser,
-  foundWeek,
   weekId,
 }) => {
-  const { weeks, setIsAdmin,setWeeks, setIsCaptain, updateUserInWeekAndLocalStorage } =
-    useCaptainContext();
+  const {
+    weeks,
+    setIsAdmin,
+    setWeeks,
+    setIsCaptain,
+    updateUserInWeekAndLocalStorage,
+  } = useCaptainContext();
+
+  const { foundWeek } = useFoundWeek(weekId);
 
   if (!selectedUser) return null;
 
@@ -135,7 +141,11 @@ const RoleMenu = ({
   };
 
   return (
-    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose}>
+    <Menu
+      anchorEl={openRoleMenu}
+      open={Boolean(openRoleMenu)}
+      onClose={onClose}
+    >
       {selectedUser?.userData?.role !== "kaptan" &&
         !selectedUser?.userData?.isCaptain && (
           <MenuItem onClick={() => handleChangeRole("kaptan")}>Kaptan</MenuItem>

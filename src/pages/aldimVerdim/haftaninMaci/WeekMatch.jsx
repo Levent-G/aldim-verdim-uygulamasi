@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { Box, Button, Stack } from "@mui/material";
+import { useFoundWeek } from "../../hooks/useFoundWeek";
 import { useCaptainContext } from "../../../context/CaptainContext";
+import { Box, Button, Stack } from "@mui/material";
+import { useState, useEffect } from "react";
 import TeamDisplay from "./components/TeamDisplay";
 import ScoreInputs from "./components/ScoreInputs";
-import PlayersScoreList from "./components/PlayersScoreList";
 import TeamPlaceholder from "./components/TeamPlaceholder";
+import PlayersScoreList from "./components/PlayersScoreList";
 
 const WeekMatch = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -12,33 +13,32 @@ const WeekMatch = () => {
   const { blackTeam, whiteTeam, weeks, weekId, setWeeks, playerPool } =
     useCaptainContext();
 
-  const currentWeek = weeks.find((w) => w?.weekId === Number(weekId));
-  const isFinished = currentWeek?.isFinished;
+  const { foundedWeek, isFinished } = useFoundWeek(weekId);
 
   const isGameOver = playerPool.length === 0;
 
   const [showTeams, setShowTeams] = useState(isGameOver ? true : false);
-  const [blackScore, setBlackScore] = useState(currentWeek?.blackScore || "");
-  const [whiteScore, setWhiteScore] = useState(currentWeek?.whiteScore || "");
+  const [blackScore, setBlackScore] = useState(foundedWeek?.blackScore || "");
+  const [whiteScore, setWhiteScore] = useState(foundedWeek?.whiteScore || "");
   const [playerScores, setPlayerScores] = useState([]);
 
   useEffect(() => {
-    if (!currentWeek) return;
+    if (!foundedWeek) return;
 
-    if (currentWeek.blackScore != null) {
-      setBlackScore(currentWeek.blackScore ?? "");
+    if (foundedWeek.blackScore != null) {
+      setBlackScore(foundedWeek.blackScore ?? "");
     }
-    if (currentWeek.whiteScore != null) {
-      setWhiteScore(currentWeek.whiteScore ?? "");
+    if (foundedWeek.whiteScore != null) {
+      setWhiteScore(foundedWeek.whiteScore ?? "");
     }
-    if (currentWeek.playersDetails?.length > 0) {
-      const scores = currentWeek.playersDetails.map((p) => ({
+    if (foundedWeek.playersDetails?.length > 0) {
+      const scores = foundedWeek.playersDetails.map((p) => ({
         id: p.id,
         score: p.score,
       }));
       setPlayerScores(scores);
     }
-  }, [weekId, weeks, blackTeam, whiteTeam, currentWeek]);
+  }, [weekId, weeks, blackTeam, whiteTeam, foundedWeek]);
 
   const handleFinishWeek = () => {
     if (blackScore === "" || whiteScore === "") {
@@ -76,49 +76,6 @@ const WeekMatch = () => {
     alert("Hafta başarıyla bitirildi!");
   };
 
-  const handleUpdatePlayerScore = (playerId, newScore) => {
-    setPlayerScores((prevScores) => {
-      const existing = prevScores.find((p) => p.id === playerId);
-      let newScores;
-      if (existing) {
-        newScores = prevScores.map((p) =>
-          p.id === playerId ? { ...p, score: newScore } : p
-        );
-      } else {
-        newScores = [...prevScores, { id: playerId, score: newScore }];
-      }
-
-      // Tüm oyuncuları takım bilgisiyle al
-      const allPlayersWithTeam = [
-        ...blackTeam.map((player) => ({ ...player, team: "black" })),
-        ...whiteTeam.map((player) => ({ ...player, team: "white" })),
-      ];
-
-      // Güncellenmiş oyuncu detaylarını oluştur
-      const playersDetails = allPlayersWithTeam.map((player) => ({
-        ...player,
-        score: newScores.find((p) => p.id === player.id)?.score || 0,
-      }));
-
-      // Haftalar dizisini güncelle
-      const updatedWeeks = weeks.map((week) => {
-        if (week.weekId === Number(weekId)) {
-          return {
-            ...week,
-            playersDetails,
-          };
-        }
-        return week;
-      });
-
-      console.log("Updating weeks with new player scores:", updatedWeeks);
-
-      setWeeks(updatedWeeks);
-
-      return newScores;
-    });
-  };
-
   const allPlayers = [
     ...blackTeam.map((player) => ({ ...player, team: "black" })),
     ...whiteTeam.map((player) => ({ ...player, team: "white" })),
@@ -140,6 +97,7 @@ const WeekMatch = () => {
             transform: "scale(1.05)",
           },
         }}
+        disabled
       >
         Haftanın Maçı Kadroları
       </Button>
@@ -148,42 +106,35 @@ const WeekMatch = () => {
         <Box sx={{ mt: 4 }}>
           <Stack spacing={4}>
             {blackTeam.length > 0 ? (
-              <TeamDisplay
-                teamName="Siyah Takım"
-                team={blackTeam}
-                currentWeek={currentWeek}
-              />
+              <TeamDisplay teamName="Siyah Takım" team={blackTeam} />
             ) : (
               <TeamPlaceholder teamName="Siyah Takım" />
             )}
 
             {whiteTeam.length > 0 ? (
-              <TeamDisplay
-                teamName="Beyaz Takım"
-                team={whiteTeam}
-                currentWeek={currentWeek}
-              />
+              <TeamDisplay teamName="Beyaz Takım" team={whiteTeam} />
             ) : (
               <TeamPlaceholder teamName="Beyaz Takım" />
             )}
 
-            <ScoreInputs
-              blackScore={blackScore}
-              setBlackScore={setBlackScore}
-              whiteScore={whiteScore}
-              setWhiteScore={setWhiteScore}
-              disabled={user?.isAdmin === false || isFinished}
-            />
+            {whiteTeam.length > 0 && blackTeam.length > 0 && (
+              <ScoreInputs
+                blackScore={blackScore}
+                setBlackScore={setBlackScore}
+                whiteScore={whiteScore}
+                setWhiteScore={setWhiteScore}
+              />
+            )}
 
             {blackScore !== "" && whiteScore !== "" && (
               <PlayersScoreList
                 players={allPlayers}
                 playerScores={playerScores}
-                handleUpdatePlayerScore={handleUpdatePlayerScore}
+                setPlayerScores={setPlayerScores}
               />
             )}
 
-            {!isFinished && (
+            {!isFinished && whiteTeam.length > 0 && blackTeam.length > 0 && (
               <Button
                 variant="contained"
                 disabled={

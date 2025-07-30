@@ -1,6 +1,5 @@
-import React from "react";
-import { Typography, Box } from "@mui/material";
 import { motion } from "framer-motion";
+import { Typography, Box } from "@mui/material";
 import FootballerSVG from "../../takimSecimi/components/FootballerSVG";
 
 export default function Header() {

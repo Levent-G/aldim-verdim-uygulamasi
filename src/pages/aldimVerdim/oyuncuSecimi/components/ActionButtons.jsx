@@ -1,17 +1,43 @@
-import React from "react";
-import { Button, Stack } from "@mui/material";
 import { motion } from "framer-motion";
+import { Button, Stack } from "@mui/material";
+import { useCaptainContext } from "../../../../context/CaptainContext";
 
-export default function ActionButtons({
-  handleRandomCaptain,
-  handleStartTeam,
-  clearCaptains,
-  handleClearAllPlayers,
-  user,
-  selectedCaptains,
-  players,
-}) {
-  const isAdmin = user?.isAdmin;
+export default function ActionButtons() {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isAdmin = user?.isAdmin === true;
+
+  const {
+    players,
+    blackCaptain,
+    whiteCaptain,
+    setPlayerPool,
+    clearCaptains,
+    setIsTeamOk,
+  } = useCaptainContext();
+
+  const selectedCaptains = [blackCaptain, whiteCaptain].filter(Boolean);
+  console.log(selectedCaptains)
+  const isDisabled = selectedCaptains.length === 2;
+
+
+  const handleStartTeam = () => {
+    if (!isAdmin) return;
+    if (!blackCaptain || !whiteCaptain) {
+      alert("Lütfen 2 kaptan seçin ya da rastgele seçin.");
+      return;
+    }
+    const poolCopy = players.filter(
+      (p) => p.id !== blackCaptain?.id && p.id !== whiteCaptain?.id
+    );
+    setPlayerPool(poolCopy);
+    setIsTeamOk(true);
+  };
+
+ 
+
+ 
+
+  if (!isAdmin) return null; // sadece admin görebilir
 
   return (
     <motion.div
@@ -25,27 +51,12 @@ export default function ActionButtons({
         justifyContent="center"
         mt={4}
       >
-        <Button
-          variant="outlined"
-          onClick={handleRandomCaptain}
-          disabled={!isAdmin || players.length < 2}
-          sx={{
-            borderColor: "#000",
-            color: "#000",
-            "&:hover": { bgcolor: "#000", color: "#fff" },
-            borderRadius: 2,
-            px: 4,
-            fontWeight: "bold",
-            textTransform: "none",
-          }}
-        >
-          Rastgele Kaptan Seç
-        </Button>
+       
 
         <Button
           variant="contained"
           onClick={handleStartTeam}
-          disabled={!isAdmin || selectedCaptains.length !== 2}
+          disabled={!isDisabled}
           sx={{
             bgcolor: "#000",
             "&:hover": { bgcolor: "#444" },
@@ -61,7 +72,6 @@ export default function ActionButtons({
         <Button
           variant="outlined"
           onClick={clearCaptains}
-          disabled={!isAdmin}
           sx={{
             borderColor: "#999",
             color: "#555",
@@ -75,23 +85,7 @@ export default function ActionButtons({
           Seçimi Sıfırla
         </Button>
 
-        <Button
-          variant="outlined"
-          color="error"
-          onClick={handleClearAllPlayers}
-          disabled={!isAdmin || selectedCaptains.length > 1}
-          sx={{
-            borderColor: "red",
-            color: "red",
-            "&:hover": { bgcolor: "red", color: "white" },
-            borderRadius: 2,
-            px: 3,
-            fontWeight: "bold",
-            textTransform: "none",
-          }}
-        >
-          Tümünü Sil
-        </Button>
+      
       </Stack>
     </motion.div>
   );

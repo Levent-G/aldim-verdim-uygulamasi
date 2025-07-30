@@ -1,13 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Box, Typography, Paper, Stack, Avatar, Rating } from "@mui/material";
+import { useCaptainContext } from "../../../../context/CaptainContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { Box, Typography, Paper, Stack, Avatar, Rating } from "@mui/material";
 
 const PlayersScoreList = ({
   players,
   playerScores,
-  handleUpdatePlayerScore,
   disabled,
+  setPlayerScores,
 }) => {
+  const { blackTeam, whiteTeam, weeks, weekId, setWeeks } = useCaptainContext();
+
   const [pendingScores, setPendingScores] = useState({});
   const [sortedPlayers, setSortedPlayers] = useState([]);
   const [lastRatedPlayerId, setLastRatedPlayerId] = useState(null);
@@ -39,6 +42,47 @@ const PlayersScoreList = ({
     setPendingScores((prev) => ({ ...prev, [playerId]: newValue }));
     setLastRatedPlayerId(playerId); // Animasyon için işaretle
     handleUpdatePlayerScore(playerId, newValue);
+  };
+
+  const handleUpdatePlayerScore = (playerId, newScore) => {
+    setPlayerScores((prevScores) => {
+      const existing = prevScores.find((p) => p.id === playerId);
+      let newScores;
+      if (existing) {
+        newScores = prevScores.map((p) =>
+          p.id === playerId ? { ...p, score: newScore } : p
+        );
+      } else {
+        newScores = [...prevScores, { id: playerId, score: newScore }];
+      }
+
+      // Tüm oyuncuları takım bilgisiyle al
+      const allPlayersWithTeam = [
+        ...blackTeam.map((player) => ({ ...player, team: "black" })),
+        ...whiteTeam.map((player) => ({ ...player, team: "white" })),
+      ];
+
+      // Güncellenmiş oyuncu detaylarını oluştur
+      const playersDetails = allPlayersWithTeam.map((player) => ({
+        ...player,
+        score: newScores.find((p) => p.id === player.id)?.score || 0,
+      }));
+
+      // Haftalar dizisini güncelle
+      const updatedWeeks = weeks.map((week) => {
+        if (week.weekId === Number(weekId)) {
+          return {
+            ...week,
+            playersDetails,
+          };
+        }
+        return week;
+      });
+
+      setWeeks(updatedWeeks);
+
+      return newScores;
+    });
   };
 
   return (

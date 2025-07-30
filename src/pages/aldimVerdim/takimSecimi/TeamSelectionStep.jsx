@@ -1,28 +1,23 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useCaptainContext } from "../../../context/CaptainContext";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
-  Typography,
-  Grid,
-  useTheme,
-  useMediaQuery,
-  Button,
   Chip,
+  Grid,
+  Button,
+  useTheme,
+  Typography,
+  useMediaQuery,
 } from "@mui/material";
 import Captain from "./components/Captain";
 import TeamPanel from "./components/TeamPanel";
 import PlayerPoolPanel from "./components/PlayerPoolPanel";
-import { useCaptainContext } from "../../../context/CaptainContext";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import {
+  captainStepsLeft,
+  captainStepsRight,
+} from "./shared/teamSelectionStepEnums";
 
-const captainStepsLeft = [-300, -250, -200, -150, -100, -50, -20];
-const captainStepsRight = [300, 250, 200, 150, 100, 50, 20];
-
-// Burada "siyah" ve "beyaz" string'lerini
-// captainPos key'lerine dönüştürmek için haritalama yapıyoruz.
-const turnToKeyMap = {
-  siyah: "black",
-  beyaz: "white",
-};
 
 export default function TeamSelectionStep() {
   const {
@@ -35,27 +30,21 @@ export default function TeamSelectionStep() {
     whiteTeam,
     setWhiteTeam,
     turn,
-    setTurn,
     captainPos,
-    setCaptainPos,
-    animatingCaptain,
-    setAnimatingCaptain,
     resetAll,
-    setBlackDoneTeam,
-    setWhiteDoneTeam,
-    isCaptain,
-    setIsFinished
+    setIsFinished,
   } = useCaptainContext();
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const [animating, setAnimating] = useState(false);
-
+  
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down("sm"));
-
+  
   const isGameOver = playerPool.length === 0;
-
+  
   const teamsInitialized = useRef(false);
+  
+  const [animating, setAnimating] = useState(false);
 
   useEffect(() => {
     if (!teamsInitialized.current && blackCaptain && whiteCaptain) {
@@ -85,7 +74,6 @@ export default function TeamSelectionStep() {
       resetAll();
     }
   }, [isGameOver, user, resetAll, playerPool, setIsFinished]);
-  
 
   const captainBlack = {
     name: blackTeam[0]?.name || "Kaptan Siyah",
@@ -101,59 +89,7 @@ export default function TeamSelectionStep() {
       "https://cdn-icons-png.flaticon.com/512/4140/4140049.png",
   };
 
-  const selectPlayer = (player) => {
-    if (isCaptain && user?.rank === turn) {
-      if (animating || isGameOver || !blackTeam[0] || !whiteTeam[0]) return;
-
-      setAnimating(true);
-      setAnimatingCaptain(turn);
-
-      const totalSelected = blackTeam.length + whiteTeam.length;
-
-      // Burada turn'u captainPos key'ine çeviriyoruz:
-      const captainKey = turnToKeyMap[turn];
-
-      // Eğer captainKey yoksa hata olmasın diye 0 kabul et
-      const currentPos =
-        typeof captainPos[captainKey] === "number" ? captainPos[captainKey] : 0;
-      let nextStep = currentPos + 1;
-
-      if (totalSelected + 1 === 14) {
-        nextStep = 6;
-      }
-
-      const newCaptainPos = { ...captainPos, [captainKey]: nextStep };
-
-      setTimeout(() => {
-        if (turn === "siyah" && blackTeam.length < 7) {
-          const newBlackTeam = [...blackTeam, player];
-          setBlackTeam(newBlackTeam);
-          setBlackDoneTeam(newBlackTeam);
-        }
-
-        if (turn === "beyaz" && whiteTeam.length < 7) {
-          const newWhiteTeam = [...whiteTeam, player];
-          setWhiteTeam(newWhiteTeam);
-          setWhiteDoneTeam(newWhiteTeam);
-        }
-
-        const newPool = playerPool.filter((p) => p.id !== player.id);
-        setPlayerPool(newPool);
-
-        setCaptainPos(newCaptainPos);
-
-        if (totalSelected + 1 === 14) {
-          setTurn(turn);
-        } else {
-          const newTurn = turn === "siyah" ? "beyaz" : "siyah";
-          setTurn(newTurn);
-        }
-
-        setAnimatingCaptain(null);
-        setAnimating(false);
-      }, 700);
-    }
-  };
+ 
 
   return (
     <Box
@@ -218,7 +154,6 @@ export default function TeamSelectionStep() {
             side="black"
             name={captainBlack.name}
             active={turn === "siyah"}
-            animatingCaptain={animatingCaptain}
             position={captainPos.black}
             steps={captainStepsLeft}
             isGameOver={isGameOver}
@@ -228,10 +163,8 @@ export default function TeamSelectionStep() {
             side="white"
             name={captainWhite.name}
             active={turn === "beyaz"}
-            animatingCaptain={animatingCaptain}
             position={captainPos.white}
             steps={captainStepsRight}
-            isGameOver={isGameOver}
           />
         </Box>
       )}
@@ -270,16 +203,13 @@ export default function TeamSelectionStep() {
             }
             players={blackTeam}
             variant="black"
-            isXs={isXs}
           />
         </Grid>
 
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <PlayerPoolPanel
-            playersPool={playerPool}
-            selectPlayer={selectPlayer}
-            isXs={isXs}
             animating={animating}
+            setAnimating={setAnimating}
           />
         </Grid>
 
@@ -316,7 +246,6 @@ export default function TeamSelectionStep() {
             }
             players={whiteTeam}
             variant="white"
-            isXs={isXs}
           />
         </Grid>
       </Grid>

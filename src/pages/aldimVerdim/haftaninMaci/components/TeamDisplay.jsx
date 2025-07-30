@@ -1,38 +1,24 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
-  Typography,
   Paper,
   Stack,
   Avatar,
+  Typography,
   IconButton,
 } from "@mui/material";
+import { useFoundWeek } from "../../../hooks/useFoundWeek";
+import { useCaptainContext } from "../../../../context/CaptainContext";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import OyuncuDegistirModal from "./OyuncuDegistirModal";
-import { useCaptainContext } from "../../../../context/CaptainContext";
 
-const TeamDisplay = ({ teamName, team, currentWeek }) => {
-  const { setBlackTeam, setWhiteTeam } = useCaptainContext();
+const TeamDisplay = ({ teamName, team }) => {
+  const { weekId } = useCaptainContext();
+
+  const { foundedWeek } = useFoundWeek(weekId);
 
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-
-  const handleReplace = (oldPlayer, newName) => {
-    const newPlayer = {
-      ...oldPlayer,
-      name: newName,
-    };
-
-    const updatedTeam = team.map((p) =>
-      p.id === oldPlayer.id ? newPlayer : p
-    );
-
-    if (teamName.includes("Siyah")) {
-      setBlackTeam(updatedTeam);
-    } else {
-      setWhiteTeam(updatedTeam);
-    }
-  };
 
   return (
     <Box>
@@ -65,7 +51,7 @@ const TeamDisplay = ({ teamName, team, currentWeek }) => {
               </Avatar>
               <Typography>{player.name}</Typography>
             </Box>
-            {!currentWeek?.isFinished && (
+            {!foundedWeek?.isFinished && (
               <IconButton
                 onClick={() => {
                   setSelectedPlayer(player);
@@ -84,7 +70,8 @@ const TeamDisplay = ({ teamName, team, currentWeek }) => {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           player={selectedPlayer}
-          onReplace={handleReplace}
+          team={team}
+          teamName={teamName}
         />
       )}
     </Box>

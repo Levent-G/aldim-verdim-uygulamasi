@@ -1,19 +1,39 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
+  Button,
   Dialog,
+  TextField,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Button,
 } from "@mui/material";
+import { useCaptainContext } from "../../../../context/CaptainContext";
 
-const OyuncuDegistirModal = ({ open, onClose, player, onReplace }) => {
+const OyuncuDegistirModal = ({ open, onClose, player, team, teamName }) => {
+  const { setBlackTeam, setWhiteTeam } = useCaptainContext();
+
   const [newName, setNewName] = useState("");
+
+  const handleReplace = (oldPlayer, newName) => {
+    const newPlayer = {
+      ...oldPlayer,
+      name: newName,
+    };
+
+    const updatedTeam = team.map((p) =>
+      p.id === oldPlayer.id ? newPlayer : p
+    );
+
+    if (teamName.includes("Siyah")) {
+      setBlackTeam(updatedTeam);
+    } else {
+      setWhiteTeam(updatedTeam);
+    }
+  };
 
   const handleSubmit = () => {
     if (!newName.trim()) return;
-    onReplace(player, newName.trim());
+    handleReplace(player, newName.trim());
     setNewName("");
     onClose();
   };

@@ -156,7 +156,7 @@ export const CaptainProvider = ({ children }) => {
     const unsubscribeUsers = onValue(userDbRef, (snapshot) => {
       const userData = snapshot.val();
       if (userData) {
-        setUsers(userData.users || []);
+        setUsers(Object.values(userData) || []);
       } else {
         setUsers([]);
       }
@@ -400,7 +400,6 @@ export const CaptainProvider = ({ children }) => {
       blackDoneTeam: [],
       whiteDoneTeam: [],
       week: [],
-      users: [],
     });
   };
 
